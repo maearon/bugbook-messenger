@@ -100,12 +100,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   // Logout function
-  const logout = () => {
-    setUser(null)
-    setAccessToken(null)
-    localStorage.removeItem("accessToken")
-    localStorage.removeItem("refreshToken")
-  }
+  const logout = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      await fetch("/api/v1/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+    } catch (error) {
+      console.log("[auth] Logout request failed", error);
+      console.warn("[auth] Logout request failed, clearing anyway.");
+    } finally {
+      setUser(null);
+      setAccessToken(null);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+    }
+  };
 
   // Refresh access token
   const refreshAccessToken = async () => {
