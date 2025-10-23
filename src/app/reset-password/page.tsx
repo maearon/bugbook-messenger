@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import javaService from "@/api/services/javaService";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
@@ -9,12 +9,12 @@ import { Loader2 } from "lucide-react";
 const Edit = () => {
   const router = useRouter();
   const [ready, setReady] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [state, setState] = useState({
     password: "",
     password_confirmation: "",
   });
-  const submitRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -55,6 +55,8 @@ const Edit = () => {
       return;
     }
 
+    setSubmitting(true);
+
     try {
       const res = await javaService.resetForForgotPassword(token!, {
         password: state.password,
@@ -74,17 +76,24 @@ const Edit = () => {
     } catch (error) {
       console.error("ResetPassword error:", error);
       alert("❌ Unable to reset password. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4 bg-gray-50">
       <div className="w-full max-w-md bg-background shadow-md rounded-2xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">Reset your password</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Reset your password
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="user_password" className="block text-base font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="user_password"
+              className="block text-base font-medium text-gray-700 mb-1"
+            >
               New Password
             </label>
             <input
@@ -100,10 +109,16 @@ const Edit = () => {
           </div>
 
           <div>
-            <label htmlFor="user_password_confirmation" className="block text-base font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="user_password_confirmation"
+              className="block text-base font-medium text-gray-700 mb-1"
+            >
               Confirm Password
             </label>
-            <Link href="/login" className="text-sm text-purple-600 hover:text-purple-700">
+            <Link
+              href="/login"
+              className="text-sm text-purple-600 hover:text-purple-700"
+            >
               Quay lại đăng nhập
             </Link>
             <input
@@ -118,13 +133,25 @@ const Edit = () => {
             />
           </div>
 
-          <div>
-            <input
-              ref={submitRef}
+          <div className="relative">
+            <button
               type="submit"
-              value="Update Password"
-              className="h-12 w-full py-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-base font-semibold text-white hover:from-purple-700 hover:to-fuchsia-700 transition"
-            />
+              disabled={submitting}
+              className={`h-12 w-full py-2 rounded-xl text-base font-semibold text-white transition ${
+                submitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700"
+              }`}
+            >
+              {submitting ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="animate-spin h-5 w-5" />
+                  Updating...
+                </div>
+              ) : (
+                "Update Password"
+              )}
+            </button>
           </div>
         </form>
       </div>
