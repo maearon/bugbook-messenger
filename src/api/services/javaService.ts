@@ -77,7 +77,7 @@ const javaService = {
   // 🔄 Password Reset
   async sendForgotPasswordEmail(params: SendForgotPasswordEmailParams): Promise<WithStatus<PasswordResetCreateResponse> | undefined> {
     try {
-      const { data }  = await api.post<WithStatus<PasswordResetCreateResponse>>("/password-resets", params)
+      const { data }  = await axiosInstance.post<WithStatus<PasswordResetCreateResponse>>("/api/v1/auth/forgot-password", params)
       return data;
     } catch (error: unknown) {
       handleNetworkError(error)
@@ -87,7 +87,7 @@ const javaService = {
 
   async resetForForgotPassword(reset_token: string, params: PasswordResetUpdateParams): Promise<WithStatus<PasswordResetUpdateResponse> | undefined> {
     try {
-      const { data }  = await api.patch<WithStatus<PasswordResetUpdateResponse>>(`/password-resets/${reset_token}`, params)
+      const { data }  = await axiosInstance.post<WithStatus<PasswordResetUpdateResponse>>(`/api/v1/auth/reset-password?token=${reset_token}`, params)
       return data;
     } catch (error: unknown) {
       handleNetworkError(error)

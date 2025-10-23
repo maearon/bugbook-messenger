@@ -17,7 +17,7 @@ const ForgotPassword: NextPage = () => {
     setSubmitting(true);
 
     try {
-      await javaService.sendForgotPasswordEmail({ email});
+      await javaService.sendForgotPasswordEmail({ email });
       submitRef.current?.blur();
       flashMessage(
         "success",
