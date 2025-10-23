@@ -33,13 +33,28 @@ axiosInstance.interceptors.request.use(
 // ⚙️ Response: gắn thêm _status vào response để dễ xử lý logic
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
+    if (response.status === 204) {
+      // 🟢 Không có nội dung, trả về object hợp lệ
+      return {
+        ...response,
+        data: null,
+        _status: 204,
+      };
+    }
+
     if (typeof response.data === "object" && response.data !== null) {
       return {
         ...response,
         _status: response.status,
       };
     }
-    return response;
+
+    // nếu là string hay HTML, cứ trả nguyên
+    return {
+      ...response,
+      _status: response.status,
+      data: response.data ?? null,
+    };
   },
   (error) => Promise.reject(error)
 );
