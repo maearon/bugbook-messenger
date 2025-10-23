@@ -9,8 +9,8 @@ import { FriendRequests } from "@/components/friends/friend-requests"
 import { AddFriendDialog } from "@/components/friends/add-friend-dialog"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
 import { ProtectedRoute } from "@/components/auth/protected-route"
+import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
   return (
@@ -22,15 +22,16 @@ export default function ProfilePage() {
 
 function ProfileContent() {
   const { user } = useAuth()
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-4xl p-4">
         <div className="mb-6 flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/chat">
+            <Button variant="ghost" size="icon" onClick={() => router.back()}>
               <ArrowLeft className="h-5 w-5" />
-            </Link>
+            </Button>
           </Button>
           <h1 className="text-2xl font-bold">Profile</h1>
         </div>
