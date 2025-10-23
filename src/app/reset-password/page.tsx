@@ -60,10 +60,11 @@ const Edit = () => {
         password: state.password,
       });
 
-      if (res?._status === 204) {
+      if (res) {
         alert("✅ Password reset successfully.");
         router.push("/login");
-      } else if (res?._status === 400) {
+      }
+      if (res?._status === 400) {
         alert("❌ Password reset failed.");
       } else if (res?.message) {
         alert(`⚠️ ${res.message}`);
