@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import javaService from "@/api/services/javaService";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
 const Edit = () => {
   const router = useRouter();
@@ -25,14 +26,14 @@ const Edit = () => {
   useEffect(() => {
     if (ready && !token) {
       // router.replace("/login");
-      alert("❌ Failed to get token from url. Please check your url in email reset.");
+      alert(`❌ Failed to get token from url. Please check your url in email reset token=${token}.`);
     }
   }, [ready, token, router]);
 
   if (!ready) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
+      <div className="flex min-h-svh items-center justify-center p-6">
+        <Loader2 className="text-purple-600 size-8 animate-spin" />
       </div>
     );
   }
