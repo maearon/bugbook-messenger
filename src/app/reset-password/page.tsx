@@ -24,7 +24,8 @@ const Edit = () => {
 
   useEffect(() => {
     if (ready && !token) {
-      router.replace("/login");
+      // router.replace("/login");
+      alert("❌ Failed to get token from url. Please check your url in email reset.");
     }
   }, [ready, token, router]);
 
