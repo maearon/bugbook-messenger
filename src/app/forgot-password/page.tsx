@@ -3,7 +3,6 @@
 import { NextPage } from "next";
 import { useRef, useState } from "react";
 import javaService from "@/api/services/javaService";
-import flashMessage from "@/components/shared/flashMessages";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -19,15 +18,9 @@ const ForgotPassword: NextPage = () => {
     try {
       await javaService.sendForgotPasswordEmail({ email });
       submitRef.current?.blur();
-      flashMessage(
-        "success",
-        "The password reset email has been sent. Please check your inbox."
-      );
+      alert("✅ The password reset email has been sent. Please check your inbox.");
     } catch (err: unknown) {
-      flashMessage(
-        "error",
-        "Failed to send reset email. Please check your email address."
-      );
+      alert("❌ Failed to send reset email. Please check your email address.");
       console.error("ForgotPassword error:", err);
     } finally {
       setSubmitting(false);

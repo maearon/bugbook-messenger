@@ -3,10 +3,9 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import javaService from "@/api/services/javaService";
-import flashMessage from "@/components/shared/flashMessages";
 import Link from "next/link";
 
-const Edit = ({ params }: { params: { slug: string[] } }) => {
+const Edit = () => {
   const router = useRouter();
   const [state, setState] = useState({
     password: "",
@@ -16,7 +15,6 @@ const Edit = ({ params }: { params: { slug: string[] } }) => {
   const submitRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
   const reset_token = searchParams.get("token");
-  const email = decodeURIComponent(params.slug[1]);
 
   if (!reset_token) {
     router.push("/login");
@@ -35,22 +33,29 @@ const Edit = ({ params }: { params: { slug: string[] } }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (state.password !== state.password_confirmation) {
+      alert("Passwords do not match!");
+      return;
+    }
+
     try {
-      const res = await javaService.resetForForgotPassword(reset_token, { password: state.password });
+      const res = await javaService.resetForForgotPassword(reset_token, {
+        password: state.password,
+      });
 
       if (res?._status === 204) {
-        flashMessage("success", "Password reset successfully.");
+        alert("✅ Password reset successfully.");
         router.push("/login");
       } else if (res?._status === 400) {
-        flashMessage("error", "Password reset failed.");
+        alert("❌ Password reset failed.");
       } else if (res?.message) {
-        flashMessage("error", res.message);
+        alert(`⚠️ ${res.message}`);
       } else {
-        flashMessage("info", "Something went wrong.");
+        alert("⚠️ Something went wrong.");
       }
     } catch (error) {
       console.error("ResetPassword error:", error);
-      flashMessage("error", "Unable to reset password. Please try again.");
+      alert("❌ Unable to reset password. Please try again.");
     }
   };
 
