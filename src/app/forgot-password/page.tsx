@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import javaService from "@/api/services/javaService";
 import flashMessage from "@/components/shared/flashMessages";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 const ForgotPassword: NextPage = () => {
   const [email, setEmail] = useState("");
@@ -51,6 +52,9 @@ const ForgotPassword: NextPage = () => {
             >
               Email address
             </label>
+            <Link href="/login" className="text-sm text-purple-600 hover:text-purple-700">
+              Quay lại đăng nhập
+            </Link>
             <input
               type="email"
               id="password_reset_email"
@@ -69,9 +73,8 @@ const ForgotPassword: NextPage = () => {
               ref={submitRef}
               type="submit"
               disabled={submitting}
-              className={`w-full flex justify-center items-center px-4 py-2 font-semibold rounded-md shadow-sm transition 
-                bg-black text-white hover:bg-gray-800 
-                dark:bg-white dark:text-black dark:hover:bg-gray-200
+              className={`h-12 w-full flex justify-center items-center px-4 py-2 font-semibold rounded-xl shadow-sm transition 
+                bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white hover:from-purple-700 hover:to-fuchsia-700
                 ${submitting ? "opacity-70 cursor-not-allowed" : ""}`}
             >
               {submitting && (

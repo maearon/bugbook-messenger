@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import javaService from "@/api/services/javaService";
 import flashMessage from "@/components/shared/flashMessages";
+import Link from "next/link";
 
 const Edit = ({ params }: { params: { slug: string[] } }) => {
   const router = useRouter();
@@ -79,6 +80,9 @@ const Edit = ({ params }: { params: { slug: string[] } }) => {
             <label htmlFor="user_password_confirmation" className="block text-base font-medium text-gray-700 mb-1">
               Confirm Password
             </label>
+            <Link href="/login" className="text-sm text-purple-600 hover:text-purple-700">
+              Quay lại đăng nhập
+            </Link>
             <input
               type="password"
               name="user[password_confirmation]"
@@ -96,7 +100,7 @@ const Edit = ({ params }: { params: { slug: string[] } }) => {
               ref={submitRef}
               type="submit"
               value="Update Password"
-              className="w-full bg-black text-white py-2 rounded-xl hover:bg-neutral-900 transition"
+              className="h-12 w-full py-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-base font-semibold text-white hover:from-purple-700 hover:to-fuchsia-700 transition"
             />
           </div>
         </form>
