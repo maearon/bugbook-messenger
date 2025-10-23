@@ -5,8 +5,10 @@ export type WithStatus<T> = T & { _status: number }
 
 // Password Reset
 export interface SendForgotPasswordEmailParams {
-  password_reset: PasswordResetCreateField
-}export interface PasswordResetCreateField {
+  email: string
+}
+
+export interface PasswordResetCreateField {
   email: string
 }
 
@@ -15,17 +17,11 @@ export interface PasswordResetCreateResponse {
 }
 
 export interface PasswordResetUpdateParams {
-  email: string
-  user: {
-    password: string
-    password_confirmation: string
-  }
+  password: string
 }
 
 export interface PasswordResetUpdateResponse {
-  user_id?: string
-  flash?: [message_type: string, message: string]
-  error?: string[]
+  message?: string
 }
 
 // Resend and Activate

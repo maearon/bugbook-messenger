@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     const resetPasswordToken = await tokenService.generateResetPasswordToken(email);
     await emailService.sendResetPasswordEmail(email, resetPasswordToken);
 
-    return NextResponse.json(null, { status: httpStatus.NO_CONTENT });
+    return new NextResponse(null, { status: httpStatus.NO_CONTENT });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Login failed";
