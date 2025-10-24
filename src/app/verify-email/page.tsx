@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import javaService from "@/api/services/javaService";
 import { CheckCircle, Loader2, AlertTriangle } from "lucide-react"; // hoặc Radix icon nếu thích
+import { LoadingDots } from "@/components/products/enhanced-product-form";
 
 const VerifyEmailPage = () => {
   const router = useRouter();
@@ -11,6 +12,7 @@ const VerifyEmailPage = () => {
   const [ready, setReady] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const [startCountdown, setStartCountdown] = useState(false);
 
   useEffect(() => {
     const t = searchParams.get("token");
@@ -52,9 +54,10 @@ const VerifyEmailPage = () => {
           const sure = window.confirm(`✅ ${res.message}`);
           setStatus("success");
           if (sure === true) {
-            setTimeout(() => {
-              router.push("/login");
-            }, 3000);
+            setStartCountdown(true); // bật đếm ngược
+            // setTimeout(() => {
+            //   router.push("/login");
+            // }, 3000);
           }
         } else {
           alert("⚠️ Something went wrong.");
@@ -96,7 +99,15 @@ const VerifyEmailPage = () => {
           <>
             <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
             <h2 className="text-xl font-semibold text-green-600">Account Activated</h2>
-            <p className="text-base text-gray-500">Redirecting to login page...</p>
+            <p className="text-base text-gray-500">
+              Redirecting to login page in{" "}
+              <CountDownTimer
+                duration={3}
+                active={startCountdown} // chỉ đếm khi người dùng confirm
+                onComplete={() => router.push("/login")}
+              />{" "}
+              s...<LoadingDots />
+            </p>
           </>
         )}
 
@@ -113,4 +124,35 @@ const VerifyEmailPage = () => {
 }
 
 export default VerifyEmailPage;
+
+interface CountDownTimerProps {
+  duration: number;
+  active?: boolean; // chỉ đếm khi active=true
+  onComplete?: () => void;
+}
+
+export function CountDownTimer({ duration, active = false, onComplete }: CountDownTimerProps) {
+  const [seconds, setSeconds] = useState(duration);
+
+  useEffect(() => {
+    if (!active) return; // không làm gì nếu chưa active
+    if (seconds <= 0) {
+      if (onComplete) onComplete();
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setSeconds((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [seconds, active, onComplete]);
+
+  // Reset khi active lại
+  useEffect(() => {
+    if (active) setSeconds(duration);
+  }, [active, duration]);
+
+  return <span>{seconds}</span>;
+}
 
