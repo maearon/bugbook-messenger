@@ -26,12 +26,12 @@ export async function POST(req: Request) {
       );
     }
 
-    await authService.resetPassword(token, password);
+    await authService.verifyEmail(token);
 
-    return NextResponse.json({ message: "Password reset successfully" }, { status: httpStatus.OK });
+    return new NextResponse(null, { status: httpStatus.NO_CONTENT });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Reset Password failed";
+      error instanceof Error ? error.message : "Verify email failed";
 
     return NextResponse.json(
       { message },

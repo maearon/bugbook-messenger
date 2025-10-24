@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     return new NextResponse(null, { status: httpStatus.NO_CONTENT });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Login failed";
+      error instanceof Error ? error.message : "Send Forgot Password Mail failed";
 
     return NextResponse.json(
       { message },
