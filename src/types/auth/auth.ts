@@ -31,7 +31,7 @@ export interface ResendActivationEmailField {
 }
 
 export interface ResendActivationEmailParams {
-  resend_activation_email: ResendActivationEmailField
+  email: string
 }
 
 export interface ResendActivationEmailResponse {

@@ -82,16 +82,16 @@ axiosInstance.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          "/api/auth/refresh",
-          { refresh_token: refreshToken },
+          "/api/v1/auth/refresh-tokens",
+          { refreshToken },
           { withCredentials: true }
         );
 
-        const newToken = data?.token;
-        const newRefresh = data?.refresh_token;
+        const newToken = data?.tokens.access.token;
+        const newRefresh = data?.tokens.refresh.token;
         if (!newToken) throw new Error("Missing new token");
 
-        setTokens(newToken, newRefresh, !!localStorage.getItem("token"));
+        setTokens(newToken, newRefresh, !!localStorage.getItem("accessToken"));
         axiosInstance.defaults.headers["Authorization"] = `Bearer ${newToken}`;
         originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
 

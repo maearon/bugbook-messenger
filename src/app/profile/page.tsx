@@ -8,9 +8,10 @@ import { FriendList } from "@/components/friends/friend-list"
 import { FriendRequests } from "@/components/friends/friend-requests"
 import { AddFriendDialog } from "@/components/friends/add-friend-dialog"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, MailIcon } from "lucide-react"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 export default function ProfilePage() {
   return (
@@ -40,6 +41,7 @@ function ProfileContent() {
           {/* Profile Card */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              {!user?.isEmailVerified && <EmailVerificationAlert />}
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={user?.image || "/placeholder.svg"} />
@@ -82,4 +84,22 @@ function ProfileContent() {
       </div>
     </div>
   )
+}
+
+function EmailVerificationAlert() {
+  return (
+    <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800/50 dark:bg-yellow-950/30">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <MailIcon className="size-5 text-yellow-600 dark:text-yellow-400" />
+          <span className="text-yellow-800 dark:text-yellow-200">
+            Please verify your email address to access all features.
+          </span>
+        </div>
+        <Button size="sm" asChild>
+          <Link href="/send-verification-email">Verify Email</Link>
+        </Button>
+      </div>
+    </div>
+  );
 }
