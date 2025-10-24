@@ -16,16 +16,6 @@ export async function POST(req: Request) {
       );
     }
 
-    const body = await req.json();
-    const { password } = body;
-
-    if (!password) {
-      return NextResponse.json(
-        { message: "Missing password in body" },
-        { status: httpStatus.BAD_REQUEST }
-      );
-    }
-
     await authService.verifyEmail(token);
 
     return new NextResponse(null, { status: httpStatus.NO_CONTENT });
