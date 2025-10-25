@@ -55,6 +55,9 @@ function ProfileContent() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
+                {typeof user?.isEmailVerified !== "undefined" && (
+                  <EmailVerificationAlert isEmailVerified={user.isEmailVerified} />
+                )}
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Email</p>
                   <p>{user?.email}</p>
@@ -66,10 +69,7 @@ function ProfileContent() {
                   </div>
                 )}
               </div>
-            </CardContent>
-            {typeof user?.isEmailVerified !== "undefined" && (
-              <EmailVerificationAlert isEmailVerified={user.isEmailVerified} />
-            )}
+            </CardContent>     
           </Card>
 
           {/* Add Friend Button */}
