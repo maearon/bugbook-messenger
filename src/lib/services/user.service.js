@@ -103,7 +103,7 @@ const searchUsersByKeyword = async (keyword) => {
   const normalizedKeyword = removeVietnameseTones(keyword).toLowerCase();
 
   // Lấy tất cả user (vì demo nên chưa cần tối ưu)
-  const allUsers = await User.find({}).lean();
+  const allUsers = await User.find({}, "name email").lean();
 
   // Lọc lại ở Node
   const filtered = allUsers.filter((u) => {
@@ -113,7 +113,12 @@ const searchUsersByKeyword = async (keyword) => {
       normalizedName.includes(normalizedKeyword) ||
       normalizedEmail.includes(normalizedKeyword)
     );
-  });
+  })
+  .map((u) => ({
+    id: u._id.toString(),
+    name: u.name,
+    email: u.email,
+  }));
 
   return filtered;
 };
