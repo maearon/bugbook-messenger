@@ -92,33 +92,38 @@ const deleteUserById = async (userId) => {
 };
 
 /**
- * 🔍 Search users by keyword (tên/email, không dấu, gần đúng)
+ * 🔍 Search users by keyword (tên/email, không dấu, gần đúng, bỏ khoảng trắng)
  * @param {string} keyword
  * @returns {Promise<Array<User>>}
  */
 const searchUsersByKeyword = async (keyword) => {
   if (!keyword || typeof keyword !== "string") return [];
 
-  // Chuẩn hóa keyword
-  const normalizedKeyword = removeVietnameseTones(keyword).toLowerCase();
+  // Chuẩn hóa keyword: bỏ dấu + thường hóa + bỏ khoảng trắng
+  const normalizedKeyword = removeVietnameseTones(keyword)
+    .toLowerCase()
+    .replace(/\s+/g, "");
 
-  // Lấy tất cả user (vì demo nên chưa cần tối ưu)
+  // Lấy danh sách user
   const allUsers = await User.find({}, "name email").lean();
 
-  // Lọc lại ở Node
-  const filtered = allUsers.filter((u) => {
-    const normalizedName = removeVietnameseTones(u.name || "").toLowerCase();
-    const normalizedEmail = (u.email || "").toLowerCase();
-    return (
-      normalizedName.includes(normalizedKeyword) ||
-      normalizedEmail.includes(normalizedKeyword)
-    );
-  })
-  .map((u) => ({
-    id: u._id.toString(),
-    name: u.name,
-    email: u.email,
-  }));
+  const filtered = allUsers
+    .filter((u) => {
+      const normalizedName = removeVietnameseTones(u.name || "")
+        .toLowerCase()
+        .replace(/\s+/g, ""); // ✅ bỏ khoảng trắng
+      const normalizedEmail = (u.email || "").toLowerCase().replace(/\s+/g, "");
+
+      return (
+        normalizedName.includes(normalizedKeyword) ||
+        normalizedEmail.includes(normalizedKeyword)
+      );
+    })
+    .map((u) => ({
+      id: u._id.toString(),
+      name: u.name,
+      email: u.email,
+    }));
 
   return filtered;
 };
