@@ -90,6 +90,18 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+/**
+ * Search users by name (case-insensitive, partial match)
+ * @param {string} name
+ * @returns {Promise<Array<User>>}
+ */
+const searchUsersByName = async (name) => {
+  if (!name || typeof name !== "string") return [];
+  // Dùng regex không phân biệt hoa thường
+  const regex = new RegExp(name, "i");
+  return User.find({ name: regex }).lean();
+};
+
 const userService = { 
   createUser, 
   queryUsers, 
@@ -97,7 +109,8 @@ const userService = {
   getUserByEmail, 
   checkUserExistsWithEmail,
   updateUserById, 
-  deleteUserById 
+  deleteUserById,
+  searchUsersByName,
 };
 
 export default userService;
