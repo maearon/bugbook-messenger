@@ -92,49 +92,30 @@ const deleteUserById = async (userId) => {
 };
 
 /**
- * Search users by keyword (case-insensitive, partial match)
+ * 🔍 Search users by keyword (tên/email, không dấu, gần đúng)
  * @param {string} keyword
  * @returns {Promise<Array<User>>}
  */
-
 const searchUsersByKeyword = async (keyword) => {
   if (!keyword || typeof keyword !== "string") return [];
 
-  const normalized = removeVietnameseTones(keyword).toLowerCase();
-  const regex = new RegExp(normalized, "i");
+  // Chuẩn hóa keyword
+  const normalizedKeyword = removeVietnameseTones(keyword).toLowerCase();
 
-  // Lấy tất cả user, normalize rồi lọc (cách 1: với DB ít)
-  // Hoặc dùng MongoDB $or (cách 2: hiệu quả hơn nếu DB lớn)
-  return User.aggregate([
-    {
-      $addFields: {
-        normalizedName: {
-          $function: {
-            body: function (name) {
-              if (!name) return "";
-              return name
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase();
-            },
-            args: ["$name"],
-            lang: "js"
-          }
-        },
-        normalizedEmail: {
-          $toLower: "$email"
-        }
-      }
-    },
-    {
-      $match: {
-        $or: [
-          { normalizedName: { $regex: regex } },
-          { normalizedEmail: { $regex: regex } }
-        ]
-      }
-    }
-  ]);
+  // Lấy tất cả user (vì demo nên chưa cần tối ưu)
+  const allUsers = await User.find({}).lean();
+
+  // Lọc lại ở Node
+  const filtered = allUsers.filter((u) => {
+    const normalizedName = removeVietnameseTones(u.name || "").toLowerCase();
+    const normalizedEmail = (u.email || "").toLowerCase();
+    return (
+      normalizedName.includes(normalizedKeyword) ||
+      normalizedEmail.includes(normalizedKeyword)
+    );
+  });
+
+  return filtered;
 };
 
 const userService = { 
