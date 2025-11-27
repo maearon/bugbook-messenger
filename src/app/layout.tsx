@@ -7,6 +7,7 @@ import "./globals.css"
 import { Suspense } from "react"
 import { SocketProvider } from "@/lib/socket/socket-context"
 import { AuthProvider } from "@/lib/auth/auth-context"
+import { ThemeProvider } from "next-themes"
 
 export const metadata: Metadata = {
   title: "Moji - Modern Chat App",
@@ -25,7 +26,14 @@ export default function RootLayout({
         <Suspense fallback={<div>Loading...</div>}>
           <SocketProvider>
             <AuthProvider>
-              {children}
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+              </ThemeProvider>
             </AuthProvider>
           </SocketProvider>
         </Suspense>

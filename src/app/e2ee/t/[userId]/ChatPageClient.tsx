@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Session } from "@/lib/auth"
 import { useAuth } from "@/lib/auth/auth-context";
 import { AddFriendDialog } from "@/components/friends/add-friend-dialog";
+import { useTheme } from "next-themes";
 
 interface ChatPageClientProps {
   session: Session | null;
@@ -30,7 +31,7 @@ export default function ChatPageClient({ session }: ChatPageClientProps) {
   const router = useRouter()
   const [selectedConversationId, setSelectedConversationId] = useState<string>()
   const [refreshKey, setRefreshKey] = useState(0)
-  const [isDark, setIsDark] = useState(false)
+  const { theme, setTheme } = useTheme();
   const [showFriendRequests, setShowFriendRequests] = useState(false)
   const { logout } = useAuth()
 
@@ -57,8 +58,7 @@ export default function ChatPageClient({ session }: ChatPageClientProps) {
   }
 
   const toggleTheme = () => {
-    setIsDark(!isDark)
-    document.documentElement.classList.toggle("dark")
+    setTheme(theme === "dark" ? "light" : "dark")
   }
 
   const handleLogout = async () => {
@@ -97,7 +97,7 @@ export default function ChatPageClient({ session }: ChatPageClientProps) {
           <h1 className="text-2xl font-bold text-white">Moji</h1>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 text-white hover:bg-white/20">
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
           </div>
         </div>
