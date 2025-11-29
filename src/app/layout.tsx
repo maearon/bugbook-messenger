@@ -7,6 +7,7 @@ import "./globals.css"
 import { Suspense } from "react"
 import { SocketProvider } from "@/lib/socket/socket-context"
 import { AuthProvider } from "@/lib/auth/auth-context"
+import { ReduxProvider } from "@/providers/redux-provider";
 import { ThemeProvider } from "next-themes"
 
 export const metadata: Metadata = {
@@ -24,18 +25,20 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={<div>Loading...</div>}>
-          <SocketProvider>
-            <AuthProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="dark"
-                enableSystem
-                disableTransitionOnChange
-              >
-                {children}
-              </ThemeProvider>
-            </AuthProvider>
-          </SocketProvider>
+          <ReduxProvider>
+            <SocketProvider>
+              <AuthProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="dark"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  {children}
+                </ThemeProvider>
+              </AuthProvider>
+            </SocketProvider>
+          </ReduxProvider>
         </Suspense>
         <Analytics />
       </body>
