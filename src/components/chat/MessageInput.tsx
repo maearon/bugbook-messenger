@@ -1,5 +1,5 @@
 "use client"
-import { useAuthStore } from '@/stores/useAuthStore'
+// import { useAuthStore } from '@/stores/useAuthStore'
 import { Conversation } from '@/types/chat'
 import { useState } from 'react'
 import { Button } from '../ui/button'
@@ -11,6 +11,7 @@ import { set } from 'mongoose'
 import chatService from '@/api/services/chatService'
 import { toast } from 'sonner'
 import { useChatStore } from '@/stores/useChatStore'
+import { authClient } from '@/lib/auth-client'
 
 interface MessageInputProps {
   selectedConversation: Conversation
@@ -23,7 +24,9 @@ const MessageInput = ({
   // conversationId, 
   // onMessageSent 
 }: MessageInputProps) => {
-  const {user} = useAuthStore()
+  // const {user} = useAuthStore()
+  const { data: sessionClient, isPending } = authClient.useSession();
+  const user = sessionClient?.user ?? null;
   const {sendMessage, sendGroupMessage} = useChatStore()
   const [message, setMessage] = useState("")
   if (!user) {  

@@ -2,8 +2,9 @@ import chatService from '@/api/services/chatService';
 import { ChatState } from '@/types/store';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { useAuthStore } from './useAuthStore';
+// import { useAuthStore } from './useAuthStore';
 import { Conversation } from '@/types/chat/models';
+import { authClient } from '@/lib/auth-client';
 
 export const useChatStore = create<ChatState>()(
   persist(
@@ -42,7 +43,9 @@ export const useChatStore = create<ChatState>()(
         },
         fetchMessages: async (id: string, cursor?: string) => {
           const { activeConversationId, messages } = get();
-          const { user } = useAuthStore.getState();
+          // const { user } = useAuthStore.getState();
+          const { data: sessionClient, isPending } = authClient.useSession();
+          const user = sessionClient?.user ?? null;
           // if (activeConversationId !== conversationId) {
           //   return;
           // }
