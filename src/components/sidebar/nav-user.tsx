@@ -29,12 +29,28 @@ import {
 import { User } from "@/types/user"
 import { LogOut } from "../auth/Logout"
 
-export function NavUser({
-  user,
-}: {
-  user: User
-}) {
+export function NavUser({ user }: { user?: User }) {
   const { isMobile } = useSidebar()
+
+  // ❗ Nếu user chưa load → không render UI (tránh crash)
+  if (!user) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" className="opacity-50 pointer-events-none">
+            <Avatar className="h-8 w-8 rounded-lg" />
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">Loading...</span>
+              <span className="truncate text-xs">Loading...</span>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
+
+  // Helper để tránh lỗi charAt trên undefined
+  const firstLetter = user.displayName?.charAt?.(0) ?? "U"
 
   return (
     <SidebarMenu>
@@ -48,7 +64,7 @@ export function NavUser({
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatarUrl} alt={user.displayName} />
                 <AvatarFallback className="rounded-lg">
-                  {user.displayName.charAt(0)}
+                  {firstLetter}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -58,6 +74,7 @@ export function NavUser({
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
@@ -69,7 +86,7 @@ export function NavUser({
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatarUrl} alt={user.username} />
                   <AvatarFallback className="rounded-lg">
-                    {user.displayName.charAt(0)}
+                    {firstLetter}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -78,7 +95,9 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <UserIcon className="text-muted-foreground dark:group-focus:!text-accent-foreground" />
@@ -89,7 +108,9 @@ export function NavUser({
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem className="cursor-pointer" variant="destructive">
               <LogOut />
             </DropdownMenuItem>
