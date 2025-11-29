@@ -1,3 +1,4 @@
+import { Conversation, Message } from './../chat/models';
 import { user } from './../../db/schema';
 export type Store = {
   id: string
@@ -29,4 +30,23 @@ export interface ThemeState {
   isDark: boolean;
   toggleTheme: () => void;
   setTheme: (dark: boolean) => void;
+}
+
+export interface ChatState {
+  conversations: Conversation[];
+  messages: Record<string, {
+    items: Message[];
+    hasMore: boolean; // infinite scroll
+    nextCursor?: string | null; // pagination cursor
+  }>;
+  activeConversationId: string | null;
+  conversationLoading: boolean;
+  messageLoading: boolean;
+  reset: () => void;
+
+  setActiveConversation: (id: string | null) => void;
+  fetchConversations: () => Promise<void>;
+  fetchMessages: (conversationId: string, cursor?: string) => Promise<void>;
+  sendMessage: (recipientId: string, content: string, imgUrl?: string) => Promise<void>;
+  sendGroupMessage: (conversationId: string, content: string, imgUrl?: string) => Promise<void>;
 }

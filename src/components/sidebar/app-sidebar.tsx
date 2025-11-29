@@ -38,6 +38,8 @@ import DirectMessageList from "../chat/DirectMessageList"
 import { registerNextThemeSetter, useThemeStore } from "@/stores/useThemeStore"
 import { useTheme } from "next-themes"
 import { useEffect } from "react"
+import { authClient } from "@/lib/auth-client"
+import { NavUser } from "./nav-user"
 
 const data = {
   user: {
@@ -164,6 +166,8 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: sessionClient, isPending } = authClient.useSession();
+  const user = sessionClient?.user ?? null;
   const { isDark, toggleTheme } = useThemeStore();
   const { theme, setTheme } = useTheme();
   const { setTheme: setZustandTheme } = useThemeStore();
@@ -217,7 +221,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       {/* Content */}
-      <SidebarContent>
+      <SidebarContent className="beautiful-scrollbar">
         {/* New Chat */}
         <SidebarGroup>
           <SidebarContent>
@@ -259,7 +263,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       {/* Footer */}
       <SidebarFooter>
-        {/* <NavUser user={data.user} /> */}
+        {user && <NavUser user={user} />}
       </SidebarFooter>
     </Sidebar>
   )

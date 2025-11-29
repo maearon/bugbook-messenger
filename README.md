@@ -39,3 +39,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 https://www.youtube.com/watch?v=KssExPfHe88&list=PLkjexOwfFoW8XH8pGUiZNA_1u7vDl6dPv
 https://ui.shadcn.com/blocks/sidebar
 https://ui.shadcn.com/docs/components/sidebar
+https://github.com/missive/emoji-mart
+(npm install emoji-mart) for V5 compatible with react 19
+https://learn.missiveapp.com/open/emoji-mart
