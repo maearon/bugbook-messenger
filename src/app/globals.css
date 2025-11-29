@@ -122,6 +122,38 @@
 }
 
 /* Scrollbar */
-.beautiful-scrollbar {
+/* .beautiful-scrollbar {
   @apply scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent dark:scrollbar-thumb-slate-600;
+} */
+/* Scrollbar custom Tailwind v4 compatible */
+.beautiful-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--tw-scrollbar-thumb) transparent;
 }
+
+/* Firefox */
+.beautiful-scrollbar {
+  --tw-scrollbar-thumb: #cbd5e1; /* slate-300 */
+}
+.dark .beautiful-scrollbar {
+  --tw-scrollbar-thumb: #475569; /* slate-600 */
+}
+
+/* Chrome + Edge + Safari */
+.beautiful-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.beautiful-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.beautiful-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* slate-300 */
+  border-radius: 8px;
+}
+
+.dark .beautiful-scrollbar::-webkit-scrollbar-thumb {
+  background: #475569; /* slate-600 */
+}
+
