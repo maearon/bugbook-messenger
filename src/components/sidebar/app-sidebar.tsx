@@ -40,6 +40,7 @@ import { useTheme } from "next-themes"
 import { useEffect } from "react"
 import { authClient } from "@/lib/auth-client"
 import { NavUser } from "./nav-user"
+import { mapBetterAuthUserToMongoUser } from "@/lib/mappers/user-data-to-simple-user"
 
 const data = {
   user: {
@@ -263,7 +264,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       {/* Footer */}
       <SidebarFooter>
-        {user && <NavUser user={user} />}
+        {user && <NavUser user={mapBetterAuthUserToMongoUser(user)} />}
       </SidebarFooter>
     </Sidebar>
   )
