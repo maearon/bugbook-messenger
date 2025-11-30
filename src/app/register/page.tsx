@@ -8,8 +8,13 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useAuth } from "@/lib/auth/auth-context";
+import javaService from "@/api/services/javaService"
 
 export default function RegisterPage() {
+  const { signUp, signIn } = useAuthStore();
+  const { login, register } = useAuth()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,12 +29,14 @@ export default function RegisterPage() {
     e.preventDefault()
     setError("")
 
-    if (formData.password !== formData.confirmPassword) {
+    const { email, password, name, confirmPassword } = formData
+
+    if (password !== confirmPassword) {
       setError("Mật khẩu không khớp")
       return
     }
 
-    if (formData.password.length < 6) {
+    if (password.length < 6) {
       setError("Mật khẩu phải có ít nhất 6 ký tự")
       return
     }
@@ -37,16 +44,49 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      const { data, error } = await authClient.signUp.email({
-        email: formData.email,
-        password: formData.password,
-        name: formData.name,
-      });
+      // 1️⃣ Better-auth signup
+      const signupRes = await authClient.signUp.email({
+        email,
+        password,
+        name,
+      })
+      
+      if (signupRes.error) {
+        setError(signupRes.error.message || "Đăng ký thất bại")
+        return
+      }
 
-      if (error) {
-        setError(error.message || "Đăng ký thất bại")
+      // 2️⃣ gọi backend để signup
+      await signUp(formData.email.split("@")[0], formData.password, formData.email, formData.name, "");
+
+      // 3️⃣ Better-auth sign-in
+      const signinRes = await authClient.signIn.email({
+        email,
+        password,
+        rememberMe: true,
+      })
+
+      if (signinRes.error) {
+        setError(signinRes.error.message || "Đăng nhập thất bại")
+        return
+      }
+
+      // 4️⃣ Kiểm tra user trong MongoDB (Java BE)
+      const checkRes = await javaService.checkEmail(email)
+      const exists = checkRes?.exists ?? false
+
+      // 5️⃣ Nếu có thì login → nếu không thì register tài khoản mới
+      if (exists) {
+        await login(email, password)
       } else {
-        router.push(`/e2ee/t/${data.user.id}`)
+        await register(email, password, name)
+      }
+      await signIn(email, password);
+
+      if (signupRes.error) {
+        setError("Đăng ký thất bại")
+      } else {
+        router.push(`/e2ee/t/${signupRes.data.user.id}`)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Đăng ký thất bại")

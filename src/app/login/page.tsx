@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/lib/auth/auth-context";
 import javaService from "@/api/services/javaService"
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function LoginPage() {
+  const { signIn } = useAuthStore();
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -47,7 +49,8 @@ export default function LoginPage() {
       } else {
         await register(email, password, data?.user?.name || "");
       }
-
+      await signIn(email, password);
+      
       // 4️⃣ Chuyển hướng sau khi đăng nhập thành công
       router.push(`/e2ee/t/${data.user.id}`);
     } catch (err) {
