@@ -5,6 +5,7 @@ import { persist } from 'zustand/middleware';
 // import { useAuthStore } from './useAuthStore';
 import { Conversation } from '@/types/chat/models';
 import { authClient } from '@/lib/auth-client';
+import { useAuthStore } from './useAuthStore';
 
 export const useChatStore = create<ChatState>()(
   persist(
@@ -136,6 +137,41 @@ export const useChatStore = create<ChatState>()(
           } catch (error) {
             console.error("Failed to send group message:", error);
           }   
+        },
+        addMessage: async (message) => {
+          try {
+            const { user } = useAuthStore.getState();
+            const { fetchMessages } = get();
+            message.isOwn = message.senderId === user?._id;
+            const conversationId = message.conversationId
+            let prevItems = get().messages[conversationId]?.items ?? [];
+            if (prevItems.length === 0) {
+              await fetchMessages(message.conversationId);
+              prevItems = get().messages[conversationId]?.items ?? [];
+            }
+            set((state) => {
+              if(prevItems.some((m) => m._id === message.id)) {
+                return state;
+              }
+              return {
+                messages: {
+                  ...state.messages,
+                  [conversationId]: {
+                    items: [...prevItems, message],
+                    hasMore: state.messages[conversationId].hasMore,
+                    nextCursor: state.messages[conversationId].nextCursor ?? undefined,
+                  }
+                }
+              }
+            })
+          } catch (error) {
+            console.error("An error occurred while adding a message.:", error);
+          }
+        },
+        updateConversation: (conversation) => {
+          set((state: ChatState): Partial<ChatState> => ({
+            conversations: state.conversations.map((c: Conversation) =>  c._id === conversation._id ? {...c,...conversation} : c),
+          }));
         },
     }),
     {

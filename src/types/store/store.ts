@@ -59,6 +59,10 @@ export interface ChatState {
   fetchMessages: (conversationId: string, cursor?: string) => Promise<void>;
   sendMessage: (recipientId: string, content: string, imgUrl?: string) => Promise<void>;
   sendGroupMessage: (conversationId: string, content: string, imgUrl?: string) => Promise<void>;
+  // add message
+  addMessage: (message: Message) => Promise<void>;
+  // update conversation
+  updateConversation: (conversation: Conversation) => void;
 }
 
 export interface SocketState {
