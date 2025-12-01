@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/sidebar"
 import { User } from "@/types/user"
 import { LogOut } from "../auth/Logout"
+import Link from "next/link"
 
 export function NavUser({ user }: { user?: User }) {
   const { isMobile } = useSidebar()
@@ -100,8 +101,10 @@ export function NavUser({ user }: { user?: User }) {
 
             <DropdownMenuGroup>
               <DropdownMenuItem>
+                <Link href="/profile" className="flex items-center gap-2">
                 <UserIcon className="text-muted-foreground dark:group-focus:!text-accent-foreground" />
                 Account
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell className="text-muted-foreground dark:group-focus:!text-accent-foreground" />
