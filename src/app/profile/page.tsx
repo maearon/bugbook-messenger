@@ -74,7 +74,7 @@ function ProfileContent() {
 
           {/* Add Friend Button */}
           <div className="flex justify-end">
-            <AddFriendDialog />
+            <AddFriendDialog forProfilePage />
           </div>
 
           {/* Friend Requests */}

@@ -12,11 +12,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { UserPlus, Search, Loader2 } from "lucide-react"
+import { UserPlus, Search, Loader2, Users } from "lucide-react"
 import { useAuth } from "@/lib/auth/auth-context"
 import type { User as UserDTO } from "@/lib/auth"
 
-export function AddFriendDialog() {
+interface AddFriendDialogProps {
+  forProfilePage?: boolean
+}
+
+export function AddFriendDialog({ forProfilePage = false }: AddFriendDialogProps) {
   const { accessToken } = useAuth()
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -83,10 +87,16 @@ export function AddFriendDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
+        {forProfilePage ? (
         <Button>
           <UserPlus className="mr-2 h-4 w-4" />
           Add Friend
         </Button>
+        ) : (
+        <Button variant="ghost" size="icon" className="h-6 w-6">
+          <UserPlus className="h-4 w-4 text-gray-500" />
+        </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

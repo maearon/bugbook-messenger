@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button"
-import { FriendRequests } from "@/components/friends/friend-requests"
+import { FriendRequestsDialog } from "@/components/friends/friend-requests-dialog";
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Session } from "@/lib/auth"
@@ -52,12 +52,12 @@ export default function ChatPageClient({ session }: ChatPageClientProps) {
         </div>
 
         {showFriendRequests && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
             <div className="w-full max-w-md">
-              <FriendRequests />
-              <Button onClick={() => setShowFriendRequests(false)} className="mt-4 w-full bg-background text-foreground hover:bg-background">
+              <FriendRequestsDialog />
+              {/* <Button onClick={() => setShowFriendRequests(false)} className="mt-4 w-full bg-background text-foreground hover:bg-background">
                 Close
-              </Button>
+              </Button> */}
             </div>
           </div>
         )}

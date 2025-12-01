@@ -6,7 +6,7 @@ import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ConversationList } from "@/components/chat/conversation-list"
-import { User, LogOut, Bell, Sun, Moon, Plus, MessageCircle, UserPlus, Loader2 } from "lucide-react"
+import { User, LogOut, Bell, Sun, Moon, Plus, MessageCircle, UserPlus, Loader2, Users } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -19,6 +19,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupActio
 import GroupChatList from "@/components/chat/GroupChatList";
 import { NavUser } from "@/components/sidebar/nav-user";
 import { mapBetterAuthUserToMongoUser } from "@/lib/mappers/user-data-to-simple-user";
+import { FriendRequestsDialog } from "@/components/friends/friend-requests-dialog";
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   session: Session | null
@@ -95,28 +96,42 @@ const AppSidebar = ({
     <Sidebar variant="inset" {...sidebarProps}>
     {/* <div className="flex w-[360px] flex-col bg-sidebar"> */}
       {/* Header */}
-      {/* <SidebarHeader>
+      {/* <SidebarHeader> */}
       <SidebarMenu>
       <SidebarMenuItem>
-      <SidebarMenuButton 
+      {/* <SidebarMenuButton 
         size="lg" 
         asChild
         className="bg-gradient-primary"
-      >
-      <a href="#"> */}
+      > */}
+      {/* <a href="https://ruby-rails-boilerplate.vercel.app" target="_blank"> */}
       <div className="flex items-center justify-between rounded-br-3xl rounded-tr-3xl bg-gradient-to-r from-purple-600 to-fuchsia-600 p-4">
-      <h1 className="text-2xl font-bold text-white">Moji</h1>
-      <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 text-white hover:bg-white/20">
-          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        <h1 className="text-2xl font-bold text-white">Moji</h1>
+
+        <div className="flex items-center gap-2">
+
+          {/* Nút mở mạng xã hội */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => window.open("https://ruby-rails-boilerplate.vercel.app", "_blank")}
+            className="h-8 w-8 text-white hover:bg-white/20"
+          >
+            <Users className="h-4 w-4" />
           </Button>
+
+          {/* Nút chuyển theme */}
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 text-white hover:bg-white/20">
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+
+        </div>
       </div>
-      </div>
-      {/* </a>
-      </SidebarMenuButton>
+      {/* </a> */}
+      {/* </SidebarMenuButton> */}
       </SidebarMenuItem>
       </SidebarMenu>
-      </SidebarHeader> */}
+      {/* </SidebarHeader> */}
 
       {/* Content */}
       <SidebarContent className="beautiful-scrollbar">
@@ -146,9 +161,10 @@ const AppSidebar = ({
       <div className="px-4">
       <div className="mb-2 flex items-center justify-between">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500">BẠN BÈ</h2>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onShowFriendRequests}>
+          {/* <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onShowFriendRequests}>
           <UserPlus className="h-4 w-4 text-gray-500" />
-          </Button>
+          </Button> */}
+          <FriendRequestsDialog />
       </div>
       </div>
 
@@ -162,15 +178,16 @@ const AppSidebar = ({
       </SidebarContent>
 
       <div className="border-t border-gray-200 dark:border-gray-800 p-3">
-      {/* <DropdownMenu>
+      <SidebarFooter>
+      <DropdownMenu>
           <DropdownMenuTrigger asChild>
-          <button className="flex w-full items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-100 group">
+          <button className="flex w-full items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
               <Avatar className="h-10 w-10">
               <AvatarImage src={user?.image || "/placeholder.svg"} />
               <AvatarFallback className="bg-purple-600 text-white">{user?.name?.[0]}</AvatarFallback>
               </Avatar>
               <div className="flex-1 text-left">
-              <p className="text-sm font-semibold text-gray-900 dark:text-foreground group-hover:dark:text-background">{user?.name}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-foreground">{user?.name}</p>
               <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
               <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -194,11 +211,12 @@ const AppSidebar = ({
               <span>Log out</span>
           </DropdownMenuItem>
           </DropdownMenuContent>
-      </DropdownMenu> */}
-      {/* Footer */}
-      <SidebarFooter>
-        {user && <NavUser user={mapBetterAuthUserToMongoUser(user)} />}
+      </DropdownMenu>
       </SidebarFooter>
+      {/* Footer */}
+      {/* <SidebarFooter>
+        {user && <NavUser user={mapBetterAuthUserToMongoUser(user)} />}
+      </SidebarFooter> */}
       </div>
     {/* </div> */}
     </Sidebar>
