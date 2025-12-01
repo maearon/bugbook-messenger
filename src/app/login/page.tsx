@@ -161,7 +161,7 @@ export default function LoginPage() {
         {/* Right side - Illustration */}
         <div className="hidden relative w-1/2 overflow-hidden lg:flex">
           <img
-            src="/placeholder.png"
+            src="/modern-login-illustration-with-people-and-mobile-app.jpg"
             alt="Login illustration"
             className="absolute inset-0 h-full w-full object-cover"
           />

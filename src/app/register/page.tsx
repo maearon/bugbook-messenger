@@ -226,7 +226,7 @@ export default function RegisterPage() {
 
         <div className="hidden relative w-1/2 overflow-hidden lg:flex">
           <img
-            src="/placeholderSignUp.png"
+            src="/modern-login-illustration-with-people-and-mobile-p.jpg"
             alt="Login illustration"
             className="absolute inset-0 h-full w-full object-cover"
           />
