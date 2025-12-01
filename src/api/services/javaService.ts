@@ -6,7 +6,7 @@ import { ApiResponse } from "@/types/common"
 import {
   UserCreateParams,
   UserCreateResponse
-} from "@/types/user"
+} from "@/types/user/user-old"
 import {
   SessionResponse,
   SessionIndexResponse,

@@ -145,7 +145,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 // export default api
 
 const BASE_URL = process.env.NODE_ENV === "development"
-  ? "http://localhost:5005/api"
+  ? "http://localhost:5001/v1"
   // : "https://adidas-microservices.onrender.com/api"
   // : "https://spring-boilerplate.onrender.com/api"
   : "https://node-boilerplate-pww8.onrender.com/v1"

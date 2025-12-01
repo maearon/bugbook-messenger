@@ -47,7 +47,7 @@ const userSchema = mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // add plugin that converts mongoose to json
@@ -76,6 +76,9 @@ userSchema.methods.isPasswordMatch = async function (password) {
   return bcrypt.compare(password, user.password);
 };
 
+/**
+ * Hash password before save
+ */
 userSchema.pre('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
@@ -87,7 +90,9 @@ userSchema.pre('save', async function (next) {
 
 /**
  * @typedef User
+ * FIX CRITICAL:
+ * Avoid OverwriteModelError in Next.js (App Router reloads model every request)
  */
-const User = mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 export default User;

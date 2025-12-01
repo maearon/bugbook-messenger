@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { models } from 'mongoose';
 import { toJSON } from './plugins/index';
 import { tokenTypes } from '../config/tokens';
 
@@ -16,7 +16,11 @@ const tokenSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: [tokenTypes.REFRESH, tokenTypes.RESET_PASSWORD, tokenTypes.VERIFY_EMAIL],
+      enum: [
+        tokenTypes.REFRESH,
+        tokenTypes.RESET_PASSWORD,
+        tokenTypes.VERIFY_EMAIL,
+      ],
       required: true,
     },
     expires: {
@@ -30,7 +34,7 @@ const tokenSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // add plugin that converts mongoose to json
@@ -39,6 +43,7 @@ tokenSchema.plugin(toJSON);
 /**
  * @typedef Token
  */
-const Token = mongoose.model('Token', tokenSchema);
+// ⭐⭐ FIX HERE – tránh overwrite model giữa các request của Next.js
+const Token = models.Token || mongoose.model('Token', tokenSchema);
 
 export default Token;
