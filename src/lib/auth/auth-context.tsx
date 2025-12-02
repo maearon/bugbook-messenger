@@ -22,7 +22,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
-  refreshAccessToken: () => Promise<void>;
+  refreshAccessToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -134,10 +134,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Refresh
-  const refreshAccessToken = async () => {
+  const refreshAccessToken = async (): Promise<string | null> => {
     const refresh = getRefreshToken();
 
-    if (!refresh) return logout();
+    if (!refresh) {
+      logout();
+      return null;
+    }
 
     try {
       const response = await fetch("/api/v1/auth/refresh-tokens", {
@@ -147,7 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        return logout();
+        logout();
+        return null;
       }
 
       const data = await response.json();
@@ -157,9 +161,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAccessTokenState(access);
 
       await fetchCurrentUser(access);
+
+      return access;             // 🔥🔥🔥 THIS IS REQUIRED
     } catch (error) {
       console.error("[auth] Failed to refresh token:", error);
       logout();
+      return null;               // 🔥 return null thay vì void
     }
   };
 
