@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 // import type { ConversationWithDetails } from "@/lib/db/models"
 import { formatDistanceToNow } from "date-fns"
-import { ConversationWithDetails } from "@/types/chat"
+import { ConversationWithDetails } from "@/types/chat/chat-old"
 import { LoadingDots } from "../products/enhanced-product-form"
 import { useRouter } from "next/navigation"
 
