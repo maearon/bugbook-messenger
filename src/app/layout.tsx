@@ -28,7 +28,6 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}
       >
-        {/* ThemeProvider phải nằm ngoài Suspense */}
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -36,14 +35,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ReduxProvider>
-            <SocketProvider>
-              <AuthProvider>
+            <AuthProvider>
+              <SocketProvider>
                 <Suspense fallback={<div>Loading...</div>}>
                   {children}
                 </Suspense>
                 <Toaster richColors />
-              </AuthProvider>
-            </SocketProvider>
+              </SocketProvider>
+            </AuthProvider>
+
           </ReduxProvider>
         </ThemeProvider>
 

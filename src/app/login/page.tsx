@@ -54,6 +54,9 @@ export default function LoginPage() {
         await register(email, password, data?.user?.name || "");
       }
       await signIn(email, password);
+
+      // useAuthStore.getState().setAccessToken(token);
+      // useAuthStore.getState().setRefreshToken(token);
       
       // 4️⃣ Chuyển hướng sau khi đăng nhập thành công
       router.push(`/e2ee/t/${data.user.id}`);

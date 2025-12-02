@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button"
 import { FriendRequestsDialog } from "@/components/friends/friend-requests-dialog";
@@ -17,32 +17,47 @@ interface ChatPageClientProps {
 
 export default function ChatPageClient({ session }: ChatPageClientProps) {
   const { 
-      data: sessionClient, 
-      isPending, //loading state
-      error, //error object
-      refetch //refetch the session
+      data: sessionClient,
+      isPending,
+      error,
+      refetch
   } = authClient.useSession()
+
   const router = useRouter()
-  const [selectedConversationId, setSelectedConversationId] = useState<string>("YnhAyaqjpK7Z7SCs0FWO1M2CuhSBhD1h")
+  const [selectedConversationId, setSelectedConversationId] = useState<string>(
+    "YnhAyaqjpK7Z7SCs0FWO1M2CuhSBhD1h"
+  )
   const [refreshKey, setRefreshKey] = useState(0)
   const [showFriendRequests, setShowFriendRequests] = useState(false)
 
+  // -------------- FIX REDIRECT ERROR --------------
+  useEffect(() => {
+    // session (từ props) hoặc sessionClient (từ hook) đều có thể được dùng
+    const finalSession = sessionClient ?? session
+
+    if (!isPending && !finalSession?.user) {
+      router.push("/login")
+    }
+  }, [session, sessionClient, isPending, router])
+  // ------------------------------------------------
+
   if (isPending) {
-    return <div className="flex h-screen items-center justify-center">
-      <Loader2 className="text-purple-600 size-8 animate-spin" />
-    </div>
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="text-purple-600 size-8 animate-spin" />
+      </div>
+    )
   }
 
-  if (!session?.user) {
-    router.push("/login")
-    return null
-  }
+  // Khi session chưa có & đang xử lý redirect → tránh render UI
+  const finalSession = sessionClient ?? session
+  if (!finalSession?.user) return null
 
   return (
     <SidebarProvider>
       <div className="flex flex-1 bg-background">        
         <AppSidebar 
-          session={session} 
+          session={finalSession}
           refreshKey={refreshKey}
           onShowFriendRequests={() => setShowFriendRequests(true)}
         />

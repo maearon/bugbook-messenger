@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { io, type Socket } from "socket.io-client";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth/auth-context"
 
 interface SocketContextType {
   socket: Socket | null;
@@ -14,6 +15,7 @@ interface SocketContextType {
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 export function SocketProvider({ children }: { children: ReactNode }) {
+  const { accessToken } = useAuth()
   const router = useRouter();
   const { data: sessionClient, isPending } = authClient.useSession();
 
@@ -39,11 +41,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     const fetchJWT = async () => {
       try {
-        const res = await fetch("/api/auth/jwt", { method: "POST" });
-        if (res.ok) {
-          const data = await res.json();
-          setJwtToken(data.tokens.access.token);
-        }
+        // const res = await fetch("/api/auth/jwt", { method: "POST" });
+        // if (res.ok) {
+        //   const data = await res.json();
+        //   setJwtToken(data.tokens.access.token);
+        // }
+        setJwtToken(accessToken);
       } catch (err) {
         console.error("[v0] Failed to fetch JWT:", err);
       }
