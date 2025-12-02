@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { formatDistanceToNow } from "date-fns"
 import { ConversationWithDetails } from "@/types/chat"
 import { LoadingDots } from "../products/enhanced-product-form"
+import { useRouter } from "next/navigation"
 
 interface ConversationListProps {
   selectedConversationId?: string
@@ -22,6 +23,15 @@ export function ConversationList({ selectedConversationId, onSelectConversation 
   const { socket } = useSocket()
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
+
+  // -------------- FIX REDIRECT ERROR --------------
+  useEffect(() => {
+    if (!accessToken) {
+      router.push("/login")
+    }
+  }, [accessToken, router])
+  // ------------------------------------------------
 
   useEffect(() => {
     fetchConversations()
