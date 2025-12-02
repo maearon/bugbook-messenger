@@ -11,19 +11,11 @@ export const setTokens = (access: string, refresh: string, keepLoggedIn: boolean
 
 export const clearTokens = () => {
   if (typeof window !== "undefined") {
-    localStorage.removeItem("googleAccessToken")
     localStorage.removeItem("accessToken")
     localStorage.removeItem("refreshToken")
     sessionStorage.removeItem("accessToken")
     sessionStorage.removeItem("refreshToken")
   }
-}
-
-export const getGoogleAccessToken = (): Nullable<string> => {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("googleAccessToken") || sessionStorage.getItem("googleAccessToken")
-  }
-  return null
 }
 
 export const getAccessToken = (): Nullable<string> => {
