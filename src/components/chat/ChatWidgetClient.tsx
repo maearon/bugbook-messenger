@@ -105,7 +105,7 @@
 //       // const CHAT_SERVICE_URL = "https://your-chat-service.onrender.com"
 
 //       socketRef.current = io(CHAT_SERVICE_URL, {
-//         query: { token: userToken },
+//         auth: { token: userToken },
 //         transports: ['websocket', 'polling']
 //       })
 

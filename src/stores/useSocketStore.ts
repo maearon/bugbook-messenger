@@ -18,7 +18,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     const existingSocket = get().socket;
     if (existingSocket) return;
     const socket: Socket = io(CHAT_SERVICE_URL, {
-      query: { token: accessToken },
+      auth: { token: accessToken },
       transports: ['websocket', 'polling']
     })
     set({socket});

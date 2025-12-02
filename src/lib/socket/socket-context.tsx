@@ -57,10 +57,26 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
   // 🔵 Tạo socket kết nối
   useEffect(() => {
-    if (!user || !jwtToken) return;
+    // if (!user || !jwtToken) return;
+    // Đợi session load xong
+    if (isPending) return;
+
+    // Không có user => không tạo socket
+    if (!user) {
+      setSocket(null);
+      return;
+    }
+
+    // Chưa có token => không tạo socket
+    if (!jwtToken) return;
+
+    // Nếu đã có socket cũ => đóng trước
+    if (socket) {
+      socket.disconnect();
+    }
 
     const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3002", {
-      query: { token: jwtToken },
+      auth: { token: jwtToken },
       transports: ["websocket", "polling"],
     });
 
@@ -88,7 +104,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     return () => {
       socketInstance.disconnect();
     };
-  }, [jwtToken, user]);
+  }, [isPending, jwtToken, socket, user]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected, jwtToken }}>
