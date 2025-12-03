@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({ user, accessToken, refreshToken })
 
-      toast.success("Chào mừng bạn quay lại với Moji 🎉")
+      // toast.success("Chào mừng bạn quay lại với Moji 🎉")
     } catch (error) {
       console.error(error)
       toast.error("Đăng nhập không thành công!")
