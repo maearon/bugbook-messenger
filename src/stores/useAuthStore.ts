@@ -79,9 +79,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (refreshToken) {
         await authService.signOut(refreshToken)
       }
-      get().clearState()
+      toast.success("Logout thành công!", { duration: 2000 })
 
-      toast.success("Logout thành công!")
+      // Đợi UI kịp render toast rồi mới xóa state
+      setTimeout(() => {
+        get().clearState()
+      }, 150)
     } catch (error) {
       console.error(error)
       toast.error("Lỗi xảy ra khi logout. Hãy thử lại!")
