@@ -46,15 +46,14 @@ export default function HomePage() {
             <Button
               asChild
               size="lg"
-              className="h-12 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 px-8 text-lg font-semibold hover:from-purple-700 hover:to-fuchsia-700"
+              className="h-12 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 px-8 text-lg font-semibold text-white hover:from-purple-700 hover:to-fuchsia-700"
             >
               <Link href="/register">Bắt đầu ngay</Link>
             </Button>
             <Button
               asChild
               size="lg"
-              variant="outline"
-              className="h-12 rounded-xl border-2 border-purple-600 bg-transparent px-8 text-lg font-semibold text-purple-600 hover:bg-purple-50"
+              className="h-12 rounded-xl border-2 border-purple-600 bg-transparent px-8 text-lg font-semibold text-purple-600 transition-colors duration-200 hover:bg-purple-100"
             >
               <Link href="/login">Đăng nhập</Link>
             </Button>
