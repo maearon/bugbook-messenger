@@ -162,20 +162,16 @@
    FIX AUTOFILL CHROME + SAFARI ON iOS
    ======================================== */
 input:-webkit-autofill {
-  background-color: transparent !important;
-  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
-  box-shadow: 0 0 0 1000px transparent inset !important;
-  -webkit-text-fill-color: #111 !important;
-  transition: background-color 9999s ease-in-out 0s !important;
-}
-
-/* When focused */
-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+  background-color: #fff !important;
   -webkit-text-fill-color: #111 !important;
 }
 
-/* For dark mode */
 .dark input:-webkit-autofill {
-  -webkit-text-fill-color: #111 !important; /* slate-100 #f1f5f9 */
+  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+  background-color: #fff !important; 
+  /* #1a1a1a */
+  -webkit-text-fill-color: #111 !important;
+  /* #f1f5f9 */
 }
 
