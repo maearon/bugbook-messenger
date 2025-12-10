@@ -32,17 +32,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // useEffect(() => {
+  //   const storedToken = getAccessToken()
+  //   if (storedToken) {
+  //     setAccessTokenState(storedToken)
+  //   }
+  //   const storedRefreshToken = getRefreshToken()
+  //   if (storedRefreshToken) {
+  //     setRefreshTokenState(storedRefreshToken)
+  //   }
+  //   setIsLoading(false)
+  // }, [])
   useEffect(() => {
-    const storedToken = getAccessToken()
-    if (storedToken) {
-      setAccessTokenState(storedToken)
+    const fetchMe = async () => {
+      if (!accessToken || !refreshToken || user) return
+
+      try {
+        setIsLoading(true)
+        const me = await authService.fetchMe()
+        if (me) setUser(me)
+      } catch (err) {
+        console.error("[auth] fetchMe failed:", err)
+        clearTokens()
+        setUser(null)
+        setAccessTokenState(null)
+        setRefreshTokenState(null)
+      } finally {
+        setIsLoading(false)
+      }
     }
-    const storedRefreshToken = getRefreshToken()
-    if (storedRefreshToken) {
-      setRefreshTokenState(storedRefreshToken)
-    }
-    setIsLoading(false)
-  }, [])
+
+    fetchMe()
+  }, [accessToken, refreshToken, user])
 
   const refreshAccessToken = useCallback(async () => {
     try {
