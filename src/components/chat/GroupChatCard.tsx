@@ -34,12 +34,11 @@ const GroupChatCard = ({conversation}: {conversation: Conversation}) => {
       }
       isActive={activeConversationId === conversation._id}
       unreadCount={unreadCount}
-      onSelect={() => handleSelectConversation}
-      unreadCount={unreadCount}
+      onSelect={() => handleSelectConversation(conversation._id)}
       leftSection={
         <>
           {
-            unreadCount && unreadCount > 0 && (
+            Boolean(unreadCount && unreadCount > 0) && (
               <UnreadCountBadge unreadCount={unreadCount} />
             )
           }
@@ -48,7 +47,7 @@ const GroupChatCard = ({conversation}: {conversation: Conversation}) => {
             type="chat"
             name={name} 
             avatarUrls={conversation.participants
-              .filter(participant => participant._id !== user.id)
+              .filter(participant => participant.email !== user.email)
               .map(participant => participant.avatarUrl ?? undefined)
             }
 

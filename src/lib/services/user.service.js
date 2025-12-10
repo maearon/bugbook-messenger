@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import httpStatus from 'http-status';
 import { User } from '@/models/index';
 import ApiError from '@/utils/ApiError';
@@ -105,7 +106,7 @@ const searchUsersByKeyword = async (keyword) => {
     .replace(/\s+/g, "");
 
   // Lấy danh sách user
-  const allUsers = await User.find({}, "name email").lean();
+  const allUsers = await User.find({}, "_id name displayName username email avatar").lean();
 
   const filtered = allUsers
     .filter((u) => {
@@ -128,6 +129,60 @@ const searchUsersByKeyword = async (keyword) => {
   return filtered;
 };
 
+/**
+ * 🔍 Search users (hỗ trợ query rỗng + loại trừ current user)
+ * @param {string} q
+ */
+export const getAllUsersLikeFriends = async (q = null) => {
+  try {
+    // ✅ Lấy toàn bộ user
+    let users = await User.find({})
+      .select("_id name displayName username email avatar")
+      .lean();
+
+    if (!users.length) return [];
+
+    // 🟩 Nếu có query → filter giống hệt friends API
+    if (q) {
+      const normalize = (str = "") =>
+        str
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+
+      const query = normalize(q);
+
+      users = users.filter((u) => {
+        const name = normalize(u.name);
+        const displayName = normalize(u.displayName);
+        const username = normalize(u.username);
+        const email = normalize(u.email);
+
+        return (
+          name.includes(query) ||
+          displayName.includes(query) ||
+          username.includes(query) ||
+          email.includes(query)
+        );
+      });
+    }
+
+    // ✅ Giới hạn 10 user
+    users = users.slice(0, 10);
+
+    // ✅ Xóa password
+    users = users.map((u) => {
+      const { password, ...rest } = u;
+      return rest;
+    });
+
+    return users;
+  } catch (error) {
+    console.error("getAllUsersLikeFriends error:", error);
+    return [];
+  }
+};
+
 const userService = { 
   createUser, 
   queryUsers, 
@@ -137,6 +192,7 @@ const userService = {
   updateUserById, 
   deleteUserById,
   searchUsersByKeyword,
+  getAllUsersLikeFriends,
 };
 
 export default userService;

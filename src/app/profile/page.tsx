@@ -1,6 +1,5 @@
 "use client"
 
-import { useAuth } from "@/lib/auth/auth-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ProfileEditDialog } from "@/components/profile/profile-edit-dialog"
@@ -12,6 +11,8 @@ import { ArrowLeft, CheckCircle2, MailIcon } from "lucide-react"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useAuthStore } from "@/stores/useAuthStore"
+import { useAuth } from "@/lib/auth/auth-context"
 
 export default function ProfilePage() {
   return (
@@ -23,16 +24,15 @@ export default function ProfilePage() {
 
 function ProfileContent() {
   const { user } = useAuth()
+  const { user: userMongo, loading } = useAuthStore();
   const router = useRouter();
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-4xl p-4">
         <div className="mb-6 flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold">Profile</h1>
         </div>
@@ -44,7 +44,9 @@ function ProfileContent() {
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={user?.image || "/avatar-placeholder.png"} />
-                  <AvatarFallback className="text-2xl">{user?.name[0]}</AvatarFallback>
+                  <AvatarFallback className="text-2xl">
+                    {user?.name?.[0] ?? "?"}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
                   <h2 className="text-2xl font-bold">{user?.name}</h2>
@@ -72,6 +74,9 @@ function ProfileContent() {
             </CardContent>     
           </Card>
 
+          {/* Friends List */}
+          <FriendList />
+
           {/* Add Friend Button */}
           <div className="flex justify-end">
             <AddFriendDialog forProfilePage />
@@ -79,9 +84,6 @@ function ProfileContent() {
 
           {/* Friend Requests */}
           <FriendRequests />
-
-          {/* Friends List */}
-          <FriendList />
         </div>
       </div>
     </div>

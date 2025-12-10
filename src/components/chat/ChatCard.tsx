@@ -54,7 +54,7 @@ const ChatCard = ({
         </div>
 
       </div>
-      {unreadCount && unreadCount > 0 && (
+      {Boolean(unreadCount && unreadCount > 0) && (
         <div className="ml-4 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-sm">
           {unreadCount}
         </div>

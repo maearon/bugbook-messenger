@@ -147,7 +147,7 @@
 //       })
 
 //       // Khi nhận tin nhắn mới
-//       socket.on('new_message', async (msg: ChatMessage) => {
+//       socket.on('new-message', async (msg: ChatMessage) => {
 //         console.log("message.user", msg.users)
 //         const isAi =
 //           msg.is_ai ||
@@ -211,7 +211,7 @@
 //         socket.off('connect');
 //         socket.off('disconnect');
 //         socket.off('message_history');
-//         socket.off('new_message');
+//         socket.off('new-message');
 //         socket.off('user_typing');
 //         socket.off('error');
 

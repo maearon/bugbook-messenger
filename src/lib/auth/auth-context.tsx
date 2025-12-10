@@ -1,195 +1,217 @@
-"use client";
+"use client"
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  type ReactNode,
-} from "react";
-import type { User } from "../auth";
-import {
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
-  clearTokens,
-} from "@/lib/token";
+import type React from "react"
+import { createContext, useContext, useState, useCallback, useEffect } from "react"
+import { getAccessToken, setAccessToken, getRefreshToken, setRefreshToken,  clearTokens } from "@/lib/token"
+import { authService } from "@/api/services/authService"
 
-interface AuthContextType {
-  user: User | null;
-  accessToken: string | null;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
-  refreshAccessToken: () => Promise<string | null>;
+export interface User {
+  id: string
+  name: string
+  email: string
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthContextType {
+  user: User | null
+  accessToken: string | null
+  refreshToken: string | null
+  login: (email: string, password: string) => Promise<void>
+  register: (email: string, password: string, name: string) => Promise<void>
+  logout: () => void
+  isLoading: boolean
+  error: string | null
+  refreshAccessToken: () => Promise<string | null>
+}
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [accessTokenState, setAccessTokenState] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-  // Load tokens from token.ts on mount
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  const [accessToken, setAccessTokenState] = useState<string | null>(null)
+  const [refreshToken, setRefreshTokenState] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   useEffect(() => {
-    const access = getAccessToken();
-    const refresh = getRefreshToken();
-
-    if (access && refresh) {
-      setAccessTokenState(access);
-      fetchCurrentUser(access);
-    } else {
-      setIsLoading(false);
+    const storedToken = getAccessToken()
+    if (storedToken) {
+      setAccessTokenState(storedToken)
     }
-  }, []);
+    const storedRefreshToken = getRefreshToken()
+    if (storedRefreshToken) {
+      setRefreshTokenState(storedRefreshToken)
+    }
+    setIsLoading(false)
+  }, [])
 
-  // Fetch /me
-  const fetchCurrentUser = async (token: string) => {
+  const refreshAccessToken = useCallback(async () => {
     try {
-      const response = await fetch(
-        `https://node-boilerplate-pww8.onrender.com/v1/auth/me`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-      } else {
-        await refreshAccessToken();
+      // Call Java backend to refresh token
+      const response = await authService.refresh?.(refreshToken || "")
+      if (response?.token) {
+        setAccessToken(response.tokens.access.token)
+        setAccessTokenState(response.tokens.access.token)
+        setRefreshToken(response.tokens.refresh.token)
+        setRefreshTokenState(response.tokens.refresh.token)
+        return response.token
       }
-    } catch (error) {
-      console.error("[auth] Failed to fetch user:", error);
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      console.error("[auth] Token refresh failed:", err)
+      clearTokens()
+      setAccessTokenState(null)
+      setUser(null)
     }
-  };
+    return null
+  }, [])
 
-  // Login
+  // ------------ LOGIN --------------
   const login = async (email: string, password: string) => {
-    const response = await fetch("/api/v1/auth/login", {
+    const res = await fetch("/api/v1/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Login failed");
-    }
+    if (!res.ok) throw new Error("Login failed");
 
-    const data = await response.json();
+    const data = await res.json();
+
     const access = data.tokens.access.token;
     const refresh = data.tokens.refresh.token;
 
-    setTokens(access, refresh, true);
-    setAccessTokenState(access);
+    // setTokens(access, refresh, true);
+    setAccessToken(access)
+    setAccessTokenState(access)
+    setRefreshToken(refresh)
+    setRefreshTokenState(refresh)
     setUser(data.user);
   };
 
-  // Register
+  // const login = useCallback(async (email: string, password: string) => {
+  //   setIsLoading(true)
+  //   setError(null)
+
+  //   try {
+  //     const response = await authService.signIn(email, password)
+  //     if (!response) {
+  //       throw new Error("Login failed")
+  //     }
+
+  //     if (response.accessToken) {
+  //       setAccessToken(response.accessToken)
+  //       setAccessTokenState(response.accessToken)
+  //       setRefreshToken(response.refreshToken)
+  //       setRefreshTokenState(response.refreshToken)
+  //     }
+  //     if (response.user) {
+  //       setUser(response.user)
+  //     }
+  //   } catch (err) {
+  //     const message = err instanceof Error ? err.message : "Login failed"
+  //     setError(message)
+  //     throw err
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }, [])
+
+  // ------------ REGISTER --------------
   const register = async (email: string, password: string, name: string) => {
-    const response = await fetch("/api/v1/auth/register", {
+    const res = await fetch("/api/v1/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, name }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Registration failed");
-    }
+    if (!res.ok) throw new Error("Register failed");
 
-    const data = await response.json();
+    const data = await res.json();
+
     const access = data.tokens.access.token;
     const refresh = data.tokens.refresh.token;
 
-    setTokens(access, refresh, true);
-    setAccessTokenState(access);
+    // setTokens(access, refresh, true);
+    setAccessToken(access)
+    setAccessTokenState(access)
+    setRefreshToken(refresh)
+    setRefreshTokenState(refresh)
     setUser(data.user);
   };
 
-  // Logout
-  const logout = async () => {
-    try {
-      const refresh = getRefreshToken();
+  // const register = useCallback(async (email: string, password: string, name: string) => {
+  //   setIsLoading(true)
+  //   setError(null)
 
-      await fetch("/api/v1/auth/logout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken: refresh }),
-      });
-    } catch (err) {
-      console.warn("[auth] Logout failed but clearing anyway.");
-    } finally {
-      clearTokens();
-      setUser(null);
-      setAccessTokenState(null);
-    }
-  };
+  //   try {
+  //     const response = await authService.signUp(email.split("@")[0], email, password, name, "")
+  //     if (!response || response.error) {
+  //       throw new Error(response?.error || "Registration failed")
+  //     }
 
-  // Refresh
-  const refreshAccessToken = async (): Promise<string | null> => {
-    const refresh = getRefreshToken();
+  //     if (response.tokens) {
+  //       setAccessToken(response.tokens.access.token)
+  //       setAccessTokenState(response.tokens.access.token)
+  //       setRefreshToken(response.tokens.refresh.token)
+  //       setRefreshTokenState(response.tokens.refresh.token)
+  //     }
+  //     if (response.user) {
+  //       setUser(response.user)
+  //     }
+  //   } catch (err) {
+  //     const message = err instanceof Error ? err.message : "Registration failed"
+  //     setError(message)
+  //     throw err
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }, [])
 
-    if (!refresh) {
-      logout();
-      return null;
-    }
+  // ------------ LOGOUT --------------
+  // const logout = async () => {
+  //   try {
+  //     await fetch("/api/v1/auth/logout", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ refreshToken: getRefreshToken() }),
+  //     });
+  //   } catch {
+  //     /* ignore */
+  //   }
 
-    try {
-      const response = await fetch("/api/v1/auth/refresh-tokens", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken: refresh }),
-      });
+  //   clearTokens();
+  //   setUser(null);
+  // };
 
-      if (!response.ok) {
-        logout();
-        return null;
-      }
-
-      const data = await response.json();
-      const access = data.tokens.access.token;
-
-      setTokens(access, refresh, true);
-      setAccessTokenState(access);
-
-      await fetchCurrentUser(access);
-
-      return access;             // 🔥🔥🔥 THIS IS REQUIRED
-    } catch (error) {
-      console.error("[auth] Failed to refresh token:", error);
-      logout();
-      return null;               // 🔥 return null thay vì void
-    }
-  };
+  const logout = useCallback(() => {
+    setError(null)
+    clearTokens()
+    setAccessTokenState(null)
+    setUser(null)
+  }, [])
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        accessToken: accessTokenState,
-        isLoading,
+        accessToken,
+        refreshToken,
         login,
         register,
         logout,
+        isLoading,
+        error,
         refreshAccessToken,
       }}
     >
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context)
-    throw new Error("useAuth must be used within an AuthProvider");
-  return context;
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error("useAuth must be used within AuthProvider")
+  }
+  return context
 }

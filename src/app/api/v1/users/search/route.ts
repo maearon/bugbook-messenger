@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   await connectToDatabase();
   try {
     const keyword = req.nextUrl.searchParams.get("q") || "";
-    const users = await userService.searchUsersByKeyword(keyword);
+    const users = await userService.getAllUsersLikeFriends(keyword);
 
     return NextResponse.json({ users }, { status: httpStatus.OK });
   } catch (error) {

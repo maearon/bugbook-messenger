@@ -5,7 +5,29 @@ import { useAuth } from "@/lib/auth/auth-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Loader2, X, RefreshCw } from "lucide-react"
+import { friendService } from "@/api/services/friendService"
 
+// Raw data từ backend
+interface FriendRequestRaw {
+  _id: string
+  from: {
+    id: string
+    username?: string
+    name?: string
+    avatar?: string
+  }
+  to: string
+  message: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface FriendRequestsResponse {
+  received: FriendRequestRaw[]
+  sent: FriendRequestRaw[]
+}
+
+// UI type
 interface FriendRequestWithSender {
   id: string
   senderId: string
@@ -25,85 +47,97 @@ export function FriendRequests() {
 
   const [receivedRequests, setReceivedRequests] = useState<FriendRequestWithSender[]>([])
   const [sentRequests, setSentRequests] = useState<FriendRequestWithSender[]>([])
-
   const [activeTab, setActiveTab] = useState<"received" | "sent">("received")
 
   const [isLoading, setIsLoading] = useState(true)
   const [isReloading, setIsReloading] = useState(false)
 
-  // đảm bảo loading tối thiểu 3 giây
+  // Force loading >= 3s
   const fetchWithDelay = async (fetcher: () => Promise<void>) => {
     setIsLoading(true)
     const start = Date.now()
 
-    await fetcher()
+    try {
+      await fetcher()
+    } catch (e) {
+      console.error("fetch error:", e)
+    }
 
     const elapsed = Date.now() - start
-    const remaining = 3000 - elapsed
-    if (remaining > 0) await new Promise(r => setTimeout(r, remaining))
+    const wait = 3000 - elapsed
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait))
 
     setIsLoading(false)
     setIsReloading(false)
   }
 
-  const loadReceived = async () => {
-    const res = await fetch("/api/friends/requests/received", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-    if (res.ok) {
-      const data = await res.json()
-      setReceivedRequests(data.requests)
+  // ---- LOAD REQUESTS (giống dialog của bạn) ----
+  const loadRequests = async () => {
+    try {
+      const res: FriendRequestsResponse = await friendService.getFriendRequests()
+
+      const received = res.received.map((r) => ({
+        id: r._id,
+        senderId: r.from.id,
+        receiverId: r.to,
+        status: "pending",
+        createdAt: r.createdAt,
+        sender: {
+          id: r.from.id,
+          name: r.from.name || "Unknown",
+          username: r.from.username || "unknown",
+          avatar: r.from.avatar,
+        },
+      }))
+
+      const sent = res.sent.map((r) => ({
+        id: r._id,
+        senderId: r.from.id,
+        receiverId: r.to,
+        status: "pending",
+        createdAt: r.createdAt,
+        sender: {
+          id: r.from.id,
+          name: r.from.name || "Unknown",
+          username: r.from.username || "unknown",
+          avatar: r.from.avatar,
+        },
+      }))
+
+      setReceivedRequests(received)
+      setSentRequests(sent)
+    } catch (err) {
+      console.error("loadRequests error:", err)
+      setReceivedRequests([])
+      setSentRequests([])
     }
   }
 
-  const loadSent = async () => {
-    const res = await fetch("/api/friends/requests/sent", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-    if (res.ok) {
-      const data = await res.json()
-      setSentRequests(data.requests)
-    }
-  }
-
-  // initial load
+  // Initial load
   useEffect(() => {
-    if (activeTab === "received") fetchWithDelay(loadReceived)
-    else fetchWithDelay(loadSent)
+    fetchWithDelay(loadRequests)
   }, [])
 
-  // switching tabs
+  // Tab switch reload
   useEffect(() => {
-    if (activeTab === "received") fetchWithDelay(loadReceived)
-    else fetchWithDelay(loadSent)
+    fetchWithDelay(loadRequests)
   }, [activeTab])
 
   const reload = () => {
     setIsReloading(true)
-    if (activeTab === "received") fetchWithDelay(loadReceived)
-    else fetchWithDelay(loadSent)
+    fetchWithDelay(loadRequests)
   }
 
-  const handleRequest = async (requestId: string, action: "accept" | "reject") => {
+  // ---- HANDLE ACCEPT / DECLINE ----
+  const handleRequest = async (id: string, action: "accept" | "reject") => {
     try {
-      const response = await fetch(`/api/friends/requests/${requestId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ action }),
-      })
+      await friendService.responseFriendRequest(id, action === "reject" ? "decline" : "accept")
 
-      if (response.ok) {
-        if (activeTab === "received") {
-          setReceivedRequests(prev => prev.filter(r => r.id !== requestId))
-        } else {
-          setSentRequests(prev => prev.filter(r => r.id !== requestId))
-        }
-      }
-    } catch (error) {
-      console.error("[v0] Handle request error:", error)
+      // remove UI
+      setReceivedRequests((prev) => prev.filter((r) => r.id !== id))
+      setSentRequests((prev) => prev.filter((r) => r.id !== id))
+    } catch (err) {
+      console.error("handleRequest error:", err)
     }
   }
 
@@ -120,7 +154,6 @@ export function FriendRequests() {
       <div className="flex items-center justify-between mb-4 mt-4">
         <h2 className="text-xl font-bold text-gray-900">Lời mời kết bạn</h2>
 
-        {/* Reload */}
         <Button
           variant="ghost"
           size="icon"
@@ -162,12 +195,12 @@ export function FriendRequests() {
 
       {/* Content */}
       <div className="space-y-3">
-        {/* Min height để UI không nhảy */}
+        {/* Loading or empty */}
         <div className="min-h-[248px] flex items-center justify-center">
           {isLoading ? (
             <Loader2 className="text-purple-600 size-8 animate-spin" />
           ) : data.length === 0 ? (
-            <p className="py-8 text-center text-gray-500">No pending requests</p>
+            <p className="py-8 text-center text-gray-500">Không có lời mời kết bạn.</p>
           ) : null}
         </div>
 
@@ -181,12 +214,8 @@ export function FriendRequests() {
             >
               <Avatar className="h-12 w-12">
                 <AvatarImage src={request.sender.avatar || "/placeholder.svg"} />
-                <AvatarFallback className="bg-teal-500 text-lg font-semibold text-white">
-                  {request.sender.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
+                <AvatarFallback>
+                  {request.sender.name[0]?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
 

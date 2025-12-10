@@ -32,27 +32,16 @@ export interface Friend {
 }
 
 export interface Conversation {
-  id: string
-  type: "direct" | "group"
-  name?: string // for group chats
-  avatar?: string // for group chats
-  participantIds: string[]
-  lastMessageId?: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface Message {
-  id: string
-  conversationId: string
-  senderId: string
-  content: string
-  type: "text" | "image" | "file"
-  fileUrl?: string
-  fileName?: string
-  seenBy: string[] // array of user IDs who have seen the message
-  createdAt: Date
-  updatedAt: Date
+  _id: string;
+  type: "direct" | "group";
+  group?: Group;
+  participants: Participant[];
+  lastMessageAt: string;
+  seenBy: SeenUser[];
+  lastMessage: LastMessage | null;
+  unreadCounts: Record<string, number>; // key = userId, value = unread count
+  createdAt: string;
+  updatedAt: string;
 }
 
 // DTOs for API responses
@@ -67,12 +56,66 @@ export interface UserDTO {
   lastSeen: Date
 }
 
-export interface ConversationWithDetails extends Conversation {
-  lastMessage?: Message
-  unreadCount?: number
-  otherParticipants?: UserDTO[]
-}
-
 export interface MessageWithSender extends Message {
   sender: UserDTO
 }
+
+export interface Participant {
+  _id: string;
+  name: string;
+  email: string;
+  displayName: string;
+  avatarUrl?: string | null;
+  joinedAt: string;
+}
+
+export interface SeenUser {
+  _id: string;
+  displayName?: string;
+  avatarUrl?: string | null;
+}
+
+export interface Group {
+  name: string;
+  createdBy: string;
+}
+
+export interface LastMessage {
+  _id: string;
+  content: string;
+  createdAt: string;
+  sender: {
+    _id: string;
+    displayName: string;
+    avatarUrl?: string | null;
+  };
+}
+
+export interface Conversation {
+  _id: string;
+  type: "direct" | "group";
+  group?: Group;
+  participants: Participant[];
+  lastMessageAt: string;
+  seenBy: SeenUser[];
+  lastMessage: LastMessage | null;
+  unreadCounts: Record<string, number>; // key = userId, value = unread count
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConversationResponse {
+  conversations: Conversation[];
+}
+
+export interface Message {
+  _id: string;
+  conversationId: string;
+  senderId: string;
+  content: string | null;
+  imgUrl?: string | null;
+  updatedAt?: string | null;
+  createdAt: string;
+  isOwn?: boolean;
+}
+

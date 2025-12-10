@@ -59,7 +59,7 @@ export function MessageInput({ conversationId, onMessageSent }: MessageInputProp
 
     setIsSending(true)
     try {
-      const response = await fetch(`/api/conversations/${conversationId}/messages`, {
+      const response = await fetch(`https://node-boilerplate-pww8.onrender.com/v1/conversations/${conversationId}/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

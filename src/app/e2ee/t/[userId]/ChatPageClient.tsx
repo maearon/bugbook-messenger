@@ -9,7 +9,8 @@ import { useRouter } from "next/navigation"
 import { Session } from "@/lib/auth"
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./AppSidebar";
-import ChatWindowLayout from "./ChatWindowLayout";
+// import ChatWindowLayout from "./ChatWindowLayout";
+import ChatWindowLayout from "@/components/chat/ChatWindowLayout"
 
 interface ChatPageClientProps {
   session: Session | null;
@@ -63,7 +64,8 @@ export default function ChatPageClient({ session }: ChatPageClientProps) {
         />
 
         <div className="flex h-screen w-full p-2">
-          <ChatWindowLayout selectedConversationId={selectedConversationId} />
+          {/* <ChatWindowLayout selectedConversationId={selectedConversationId} /> */}
+          <ChatWindowLayout />
         </div>
 
         {showFriendRequests && (

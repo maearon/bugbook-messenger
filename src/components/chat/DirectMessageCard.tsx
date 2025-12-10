@@ -20,7 +20,7 @@ const DirectMessageCard = ({conversation}: {conversation: Conversation}) => {
   if (!user) {
     return null;
   }
-  const otherParticipant = conversation.participants.find(participant => participant._id !== user.id);
+  const otherParticipant = conversation.participants.find(participant => participant.email !== user.email);
   if (!otherParticipant) {
     return null;
   }
@@ -40,7 +40,7 @@ const DirectMessageCard = ({conversation}: {conversation: Conversation}) => {
     <ChatCard
       key={conversation._id}
       conversationId={conversation._id}
-      name={otherParticipant.displayName ?? "Unknown User"}
+      name={otherParticipant.name ?? "Unknown User"}
       timeStamp={
         conversation.lastMessage?.createdAt 
           ? new Date(conversation.lastMessage.createdAt) 
@@ -51,21 +51,21 @@ const DirectMessageCard = ({conversation}: {conversation: Conversation}) => {
       onSelect={() => handleSelectConversation(conversation._id)}
       leftSection={
         <>
-          <UserAvatar type="sidebar" name={otherParticipant.displayName ?? ""} 
+          <UserAvatar type="sidebar" name={otherParticipant.name ?? ""} 
             avatarUrl={otherParticipant.avatarUrl ?? undefined}
           />
           <StatusBadge 
             status={onlineUsers.includes(otherParticipant?._id ?? "") ? "online" : "offline"}
           />
           {
-            unreadCount && unreadCount > 0 && (
+            Boolean(unreadCount && unreadCount > 0) && (
               <UnreadCountBadge unreadCount={unreadCount} />
             )
           }
         </>
       }
       subtitle={
-        <p className={cn("text-sm truncate", unreadCount && unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground")}>
+        <p className={cn("text-sm truncate", Boolean(unreadCount && unreadCount > 0) ? "font-medium text-foreground" : "text-muted-foreground")}>
           {lastMessage}
         </p>
       }

@@ -1,11 +1,23 @@
 import { useChatStore } from '@/stores/useChatStore';
 import ChatWelcomeScreen from './ChatWelcomeScreen';
 import MessageItem from './MessageItem';
+import { useEffect, useRef } from 'react';
 
 const ChatWindowBody = () => {
   const {activeConversationId, conversations, messages: allMessages} = useChatStore();  
   const messages = activeConversationId ? allMessages[activeConversationId!].items : [];
-  const selectedConversation = conversations.find(c => c.id === activeConversationId);
+  const selectedConversation = conversations.find(c => c._id === activeConversationId);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "instant" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
   if (!selectedConversation) {
     return <ChatWelcomeScreen />;
   }
@@ -17,9 +29,10 @@ const ChatWindowBody = () => {
       </div>
     );
   }
+  
   return (
     <div className="px-4 bg-primary-foreground h-full flex flex-col overflow-hidden">
-      <div className="flex flex-col overflow-y-auto overflow-x-hidden beautiful-scrollbar">
+      <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden beautiful-scrollbar">
         {messages.map((message, index) => (
           // <div key={message.id} className="mb-4">
           //   {/* <div className="text-sm text-gray-500 mb-1">{message.senderName}</div> */}
@@ -37,6 +50,7 @@ const ChatWindowBody = () => {
             lastMessageStatus='delivered'
           />
         ))}
+        <div ref={messagesEndRef} />
       </div>
     </div>
   )

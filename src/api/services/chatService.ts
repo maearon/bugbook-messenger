@@ -6,6 +6,57 @@ interface FetchMessageProps {
   cursor?: string;
 }
 
+interface CreateGroupPayload {
+  type: "group";
+  name: string;
+  memberIds: string[];
+}
+
+export interface CreateGroupResponse {
+  _id: string;
+  type: "group";
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  group: {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+    createdBy: string;
+    createdAt: string;
+  };
+  participants: {
+    id: string;
+    email: string;
+    name: string;
+    avatarUrl?: string;
+  }[];
+}
+
+interface CreateDirectChatPayload {
+  type: "direct";
+  memberIds: string[];
+}
+
+export interface CreateDirectChatResponse {
+  _id: string;
+  type: "direct";
+  createdAt: string;
+  updatedAt: string;
+  participants: {
+    id: string;
+    email: string;
+    name: string;
+    avatarUrl?: string;
+  }[];
+  lastMessage?: {
+    id: string;
+    content: string;
+    createdAt: string;
+    senderId: string;
+  };
+}
+
 const pageLimit = 50;
 
 export const chatService = {
@@ -57,6 +108,24 @@ export const chatService = {
       return response.data.message;
     } catch (error: unknown) {
       console.error("Error sending group message:", error);
+      throw error;
+    }
+  },
+  async createGroupChat(data: CreateGroupPayload): Promise<{ conversation: CreateGroupResponse } | undefined> {
+    try {
+      const response = await api.post<{ conversation: CreateGroupResponse }>("/conversations", data);
+      return response.data;
+    } catch (error: unknown) {
+      console.error("Error creating group chat:", error);
+      throw error;
+    }
+  },
+  async createDirectChat(data: CreateDirectChatPayload): Promise<{ conversation: CreateDirectChatResponse } | undefined> {
+    try {
+      const response = await api.post<{ conversation: CreateDirectChatResponse }>("/conversations", data);
+      return response.data;
+    } catch (error: unknown) {
+      console.error("Error creating group chat:", error);
       throw error;
     }
   },

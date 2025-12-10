@@ -59,13 +59,18 @@ api.interceptors.response.use(
   (res: AxiosResponse) => res,
 
   async (error) => {
-    const original = error.config
+    const original = error.config as InternalAxiosRequestConfig | undefined
+
+    // if no original config, just reject
+    if (!original) return Promise.reject(error)
+
+    const originalUrl = String(original.url || "")
 
     // Bỏ qua login/register/refresh
     if (
-      original.url.includes("/auth/login") ||
-      original.url.includes("/auth/register") ||
-      original.url.includes("/auth/refresh-tokens")
+      originalUrl.includes("/auth/login") ||
+      originalUrl.includes("/auth/register") ||
+      originalUrl.includes("/auth/refresh-tokens")
     ) {
       return Promise.reject(error)
     }
@@ -79,6 +84,7 @@ api.interceptors.response.use(
         return new Promise((resolve, reject) => {
           failedQueue.push({
             resolve: (token: string) => {
+              if (!original.headers) original.headers = {}
               original.headers.Authorization = `Bearer ${token}`
               resolve(api(original))
             },
@@ -93,11 +99,15 @@ api.interceptors.response.use(
         const refreshToken = getRefreshToken()
 
         if (!refreshToken) {
+          // no refresh token -> clear state everywhere
           clearTokens()
-          useAuthStore.getState().clearState()
+          try { useAuthStore.getState().clearState() } catch (_) {}
+          // notify other parts (AuthContext) to logout
+          window.dispatchEvent(new CustomEvent("auth:logged_out"))
           return Promise.reject(error)
         }
 
+        // Use axios (not api) to call refresh (avoid interceptor loop)
         const res = await axios.post(`${BASE_URL}/auth/refresh-tokens`, {
           refreshToken,
         })
@@ -105,23 +115,38 @@ api.interceptors.response.use(
         const newAccess = res.data?.tokens?.access?.token
         const newRefresh = res.data?.tokens?.refresh?.token
 
+        if (!newAccess) {
+          throw new Error("Refresh returned no access token")
+        }
+
         // Lưu lại token → lib token
         setTokens(newAccess, newRefresh, true)
 
         // Cập nhật Zustand → UI sync
-        useAuthStore.getState().setAccessToken(newAccess)
-        useAuthStore.getState().setRefreshToken(newRefresh)
+        try {
+          useAuthStore.getState().setAccessToken(newAccess)
+          useAuthStore.getState().setRefreshToken(newRefresh)
+        } catch (_) {}
 
+        // update default header for future requests
         api.defaults.headers.Authorization = `Bearer ${newAccess}`
+
+        // Inform other parts of the app (AuthContext, SocketProvider) that tokens updated
+        window.dispatchEvent(new CustomEvent("auth:tokens_updated", {
+          detail: { accessToken: newAccess, refreshToken: newRefresh }
+        }))
 
         processQueue(null, newAccess)
 
+        if (!original.headers) original.headers = {}
         original.headers.Authorization = `Bearer ${newAccess}`
         return api(original)
       } catch (refreshError) {
         processQueue(refreshError, null)
         clearTokens()
-        useAuthStore.getState().clearState()
+        try { useAuthStore.getState().clearState() } catch (_) {}
+        // notify other parts to logout/clear state
+        window.dispatchEvent(new CustomEvent("auth:logged_out"))
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false

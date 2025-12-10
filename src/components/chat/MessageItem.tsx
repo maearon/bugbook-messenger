@@ -33,7 +33,7 @@ const MessageItem = ({message,index,messages,selectedConversation,lastMessageSta
               (
                 <UserAvatar 
                   type={"chat"} 
-                  name={participant?.displayName ?? "Unknown"}
+                  name={participant?.name ?? "Unknown"}
                   avatarUrl={participant?.avatarUrl ?? undefined} 
                   // alt={participant.name} 
                   // size={32} 

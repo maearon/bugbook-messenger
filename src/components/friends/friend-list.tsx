@@ -1,18 +1,33 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useAuth } from "@/lib/auth/auth-context"
 import { useSocket } from "@/lib/socket/socket-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { User as UserDTO  } from "@/lib/auth"
 import { SOCKET_EVENTS } from "@/lib/socket/socket-server"
+import { friendService } from "@/api/services/friendService"
+import { authClient } from "@/lib/auth-client"
+
+interface Friend {
+  id: string;
+  name: string;
+  email: string;
+  role?: string;
+  avatar?: string;
+  isOnline?: boolean;
+}
+
+interface FriendResponse {
+  friends: { _id: string; name: string; email: string; avatar?: string; role?: string }[];
+}
 
 export function FriendList() {
-  const { accessToken } = useAuth()
+  const { data: sessionClient } = authClient.useSession();
+  const userBetterAuth = sessionClient?.user ?? null;
   const { socket } = useSocket()
-  const [friends, setFriends] = useState<UserDTO[]>([])
+  const [friends, setFriends] = useState<Friend[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -31,15 +46,22 @@ export function FriendList() {
 
   const fetchFriends = async () => {
     try {
-      const response = await fetch("/api/friends", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
+      const res = await friendService.getFriends("");
+      let list =
+        res.friends?.map((f) => ({
+          id: f._id, // FIX: MAP _id → id
+          name: f.name,
+          email: f.email,
+          role: f.role,
+          avatar: f.avatar,
+          isOnline: false, // important!
+        })) || [];
+      // remove yourself
+      // list = list.filter((f) => f.id !== userMongo?._id);
+      list = list.filter((f) => f.email !== userBetterAuth?.email);
 
-      if (response.ok) {
-        const data = await response.json()
-        setFriends(data.friends)
+      if (res) {
+        setFriends(list)
       }
     } catch (error) {
       console.error("[v0] Fetch friends error:", error)
@@ -65,15 +87,15 @@ export function FriendList() {
             {friends.map((friend) => (
               <div key={friend.id} className="flex items-center gap-3 rounded-lg border p-3">
                 <Avatar>
-                  <AvatarImage src={friend.image || "/placeholder.svg"} />
+                  <AvatarImage src={friend.avatar || "/placeholder.svg"} />
                   <AvatarFallback>{friend.name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <p className="font-medium">{friend.name}</p>
-                  <p className="text-sm text-muted-foreground">@{friend.name}</p>
+                  <p className="text-sm text-muted-foreground">@{friend.email.split("@")[0]}</p>
                 </div>
-                <Badge variant={friend.role ? "default" : "secondary"}>
-                  {friend.role ? "Online" : "Offline"}
+                <Badge variant={friend.isOnline ? "default" : "secondary"}>
+                  {friend.isOnline ? "Online" : "Offline"}
                 </Badge>
               </div>
             ))}

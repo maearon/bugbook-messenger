@@ -13,7 +13,10 @@ const ChatWindowHeader = ({ chat: propChat }: { chat?: Conversation }) => {
   const { data: sessionClient } = authClient.useSession();
   const user = sessionClient?.user ?? null;
   const { onlineUsers } = useSocketStore();
-  const chat = propChat ?? conversations.find(c => c.id === activeConversationId) ?? undefined;
+  if (!user) {
+    return null;
+  }
+  const chat = propChat ?? conversations.find(c => c._id === activeConversationId) ?? undefined;
 
   if (!chat) {
     return (
@@ -24,10 +27,14 @@ const ChatWindowHeader = ({ chat: propChat }: { chat?: Conversation }) => {
   }
 
   // compute otherParticipant in outer scope so it's available in JSX below
-  const otherParticipant = chat.type === "direct" && "participants" in chat
-    ? chat.participants.find(participant => participant._id !== user?.id) ?? null
-    : null;
+  let otherParticipant: Conversation["participants"][number] | undefined;
 
+  if (chat.type === "direct" && "participants" in chat) {
+    otherParticipant = chat.participants.find(
+      p => p.email !== user?.email
+    );
+  }
+  
   if (chat.type === "group") {
     // return <GroupChatHeader chat={chat} />
   } else if (chat.type === "direct") {
@@ -50,7 +57,7 @@ const ChatWindowHeader = ({ chat: propChat }: { chat?: Conversation }) => {
               <>
                 <UserAvatar
                   type={"sidebar"}
-                  name={otherParticipant?.displayName || "Unknown User"}
+                  name={otherParticipant?.name || "Unknown User"}
                   avatarUrl={otherParticipant?.avatarUrl || undefined}
                 />
                 <StatusBadge 
@@ -72,9 +79,9 @@ const ChatWindowHeader = ({ chat: propChat }: { chat?: Conversation }) => {
         <h2 className="text-foreground font-semibold">
           {
             chat.type === "direct" ? (
-              otherParticipant?.displayName || "Unknown User"
+              otherParticipant?.name ?? "Unknown User"
             ) : (
-              "name" in chat && chat.name ? chat.name : "Unnamed Group"
+              chat.group?.name ?? "Unnamed Group"
             )
           }
         </h2>

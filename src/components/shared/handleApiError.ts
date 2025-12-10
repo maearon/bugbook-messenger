@@ -7,7 +7,7 @@ interface ValidationErrorItem {
   defaultMessage?: string
 }
 
-interface ErrorResponseData {
+export interface ErrorResponseData {
   _status?: number
   errors?: ValidationErrorItem[]
   message?: string

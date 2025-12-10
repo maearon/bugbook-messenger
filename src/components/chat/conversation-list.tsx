@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 // import type { ConversationWithDetails } from "@/lib/db/models"
 import { formatDistanceToNow } from "date-fns"
-import { ConversationWithDetails } from "@/types/chat/chat-old"
+import { ConversationWithDetails } from "@/types/chat/models"
 import { LoadingDots } from "../products/enhanced-product-form"
 import { useRouter } from "next/navigation"
 
@@ -49,7 +49,7 @@ export function ConversationList({ selectedConversationId, onSelectConversation 
 
   const fetchConversations = async () => {
     try {
-      const response = await fetch("/api/conversations", {
+      const response = await fetch("https://node-boilerplate-pww8.onrender.com/v1/conversations", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -76,7 +76,7 @@ export function ConversationList({ selectedConversationId, onSelectConversation 
         {conversations.length === 0 ? (
           <p className="p-4 text-center text-sm text-gray-500">No conversations yet</p>
         ) : (
-          conversations.map((conversation) => {
+          conversations.map((conversation, index) => {
             const otherUser = conversation.otherParticipants?.[0]
             const displayName = conversation.type === "group" ? conversation.name : otherUser?.name
             const displayAvatar = conversation.type === "group" ? conversation.avatar : otherUser?.avatar
@@ -84,7 +84,7 @@ export function ConversationList({ selectedConversationId, onSelectConversation 
 
             return (
               <button
-                key={conversation.id}
+                key={`${index}-${conversation.id}`}
                 onClick={() => onSelectConversation(conversation.id)}
                 className={`flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all ${
                   isSelected

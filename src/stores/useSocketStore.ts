@@ -34,7 +34,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
       set({ onlineUsers: userIds });
     })
     // new message
-    socket.on('new_message', (message, conversation, unreadCounts) => {
+    socket.on('new-message', (message, conversation, unreadCounts) => {
       useChatStore.getState().addMessage(message);
       const lastMessage = {
         _id: conversation.lastMessage._id,
@@ -64,7 +64,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
       // socket.off('connect');
       // socket.off('disconnect');
       // socket.off('message_history');
-      // socket.off('new_message');
+      // socket.off('new-message');
       // socket.off('user_typing');
       // socket.off('error');
 

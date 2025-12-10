@@ -52,7 +52,7 @@ export function NewChatDialog({ onConversationCreated }: NewChatDialogProps) {
   const handleCreateConversation = async (friendId: string) => {
     setIsLoading(true)
     try {
-      const response = await fetch("/api/conversations", {
+      const response = await fetch("https://node-boilerplate-pww8.onrender.com/v1/conversations", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

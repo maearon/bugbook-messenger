@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Switch } from "@/components/ui/switch"
 import CreateNewChat from "../chat/CreateNewChat"
-import NewGroupChatModal from "../chat/NewGroupChatModal"
+import NewGroupChatModal from "../chat/NewGroupChatDialog"
 import GroupChatList from "../chat/GroupChatList"
 import AddFriendModal from "../chat/AddFriendModal"
 import DirectMessageList from "../chat/DirectMessageList"
@@ -41,6 +41,7 @@ import { useEffect } from "react"
 import { authClient } from "@/lib/auth-client"
 import { NavUser } from "./nav-user"
 import { mapBetterAuthUserToMongoUser } from "@/lib/mappers/user-data-to-simple-user"
+import { useChatStore } from "@/stores/useChatStore"
 
 const data = {
   user: {
@@ -172,6 +173,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isDark, toggleTheme } = useThemeStore();
   const { theme, setTheme } = useTheme();
   const { setTheme: setZustandTheme } = useThemeStore();
+  const fetchConversations = useChatStore(state => state.fetchConversations);
+  
+  useEffect(() => {
+    fetchConversations();
+  }, []);
 
   useEffect(() => {
     // Ưu tiên next-themes => sync vào Zustand
