@@ -174,7 +174,7 @@ const AppSidebar = ({
         <DropdownMenuTrigger asChild>
         <button className="flex w-full items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
             <Avatar className="h-10 w-10">
-            <AvatarImage src={user?.image || "/placeholder.svg"} />
+            <AvatarImage src={user?.image || "/avatar-placeholder.png"} />
             <AvatarFallback className="bg-purple-600 text-white">{user?.name?.[0]}</AvatarFallback>
             </Avatar>
             <div className="flex-1 text-left">
