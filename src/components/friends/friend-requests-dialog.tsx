@@ -36,7 +36,13 @@ interface FriendRequestRaw {
     email?: string;
     avatar?: string;
   };
-  to: string;
+  to: {
+    id: string;
+    username?: string;
+    name?: string;
+    email?: string;
+    avatar?: string;
+  };
   message: string;
   createdAt: string;
   updatedAt: string;
@@ -95,11 +101,11 @@ export function FriendRequestsDialog() {
       const sent = (res?.sent || []).map((r: FriendRequestRaw): FriendRequestUI => ({
         id: r._id,
         sender: {
-          id: r.from?.id || "",
-          name: r.from?.name || "Unknown",
-          username: r.from?.username || "unknown",
-          email: r.from?.email || "unknown",
-          avatar: r.from?.avatar,
+          id: r.to?.id || "",
+          name: r.to?.name || "Unknown",
+          username: r.to?.username || "unknown",
+          email: r.to?.email || "unknown",
+          avatar: r.to?.avatar,
         },
         createdAt: r.createdAt,
       }))
