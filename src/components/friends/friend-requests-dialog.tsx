@@ -21,6 +21,7 @@ interface FriendRequestUI {
     id: string
     username: string
     name: string
+    email?: string;
     avatar?: string
   }
   createdAt: string
@@ -32,6 +33,7 @@ interface FriendRequestRaw {
     id: string;
     username?: string;
     name?: string;
+    email?: string;
     avatar?: string;
   };
   to: string;
@@ -226,7 +228,8 @@ export function FriendRequestsDialog() {
 
                   <div className="flex-1">
                     <p className="font-semibold">{r.sender.name}</p>
-                    <p className="text-sm text-muted-foreground">@{r.sender.username}</p>
+                    {/* <p className="text-sm text-muted-foreground">@{r.sender.email.split("@")[0]}</p> */}
+                    <p className="text-sm text-muted-foreground">{r.sender.email}</p>
                   </div>
 
                   <div className="flex gap-2">

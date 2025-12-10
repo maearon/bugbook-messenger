@@ -178,7 +178,7 @@ export default function NewDirectChatDialog() {
               displayedFriends.map((friend) => (
                 <div key={friend.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/40">
                   <Avatar>
-                    <AvatarImage src={friend.avatar || "/placeholder.svg"} />
+                    <AvatarImage src={friend.avatar || "/avatar-placeholder.png"} />
                     <AvatarFallback>{friend.name[0]}</AvatarFallback>
                   </Avatar>
 
