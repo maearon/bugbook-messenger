@@ -10,6 +10,7 @@ import { AuthProvider } from "@/lib/auth/auth-context"
 import { ReduxProvider } from "@/providers/redux-provider"
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
+import ChatWidgetServer from "@/components/chat/ChatWidgetServer"
 
 export const metadata: Metadata = {
   title: "Moji - Modern Chat App",
@@ -39,6 +40,7 @@ export default function RootLayout({
               <SocketProvider>
                 <Suspense fallback={<div>Loading...</div>}>
                   {children}
+                  <ChatWidgetServer />
                 </Suspense>
                 <Toaster richColors />
               </SocketProvider>
