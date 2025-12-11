@@ -12,6 +12,7 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Loader2, RefreshCw, UserPlus, UserSearch } from "lucide-react";
 import { friendService } from "@/api/services/friendService";
 import { getAccessToken } from "@/lib/token";
@@ -30,24 +31,22 @@ interface SuggestionUser {
   isSelf?: boolean;
 }
 
-// ------------------------------------------
-// Component
-// ------------------------------------------
-
-export function FriendSuggestionsDialog({ forProfilePage = false }: AddFriendDialogProps) {
+export function FriendSuggestionsDialog({
+  forProfilePage = false,
+}: AddFriendDialogProps) {
   const accessToken = getAccessToken();
 
   const [open, setOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<SuggestionUser[]>([]);
+  const [query, setQuery] = useState(""); // <--- INPUT q
 
   const [isLoading, setIsLoading] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
-
   const [isSending, setIsSending] = useState<string | null>(null);
 
-  // ------------------------------------------
-  // Wrapper delay >= 3s
-  // ------------------------------------------
+  // -------------------------------------------------
+  // Delay >= 3s wrapper
+  // -------------------------------------------------
   const fetchWithDelay = async (fetcher: () => Promise<void>) => {
     setIsLoading(true);
     const start = Date.now();
@@ -60,20 +59,21 @@ export function FriendSuggestionsDialog({ forProfilePage = false }: AddFriendDia
 
     const elapsed = Date.now() - start;
     const wait = 3000 - elapsed;
-
     if (wait > 0) await new Promise((r) => setTimeout(r, wait));
 
     setIsLoading(false);
     setIsReloading(false);
   };
 
-  // ------------------------------------------
-  // Load suggestions
-  // ------------------------------------------
+  // -------------------------------------------------
+  // Fetch API suggestions
+  // -------------------------------------------------
   const loadSuggestions = async () => {
     try {
       const response = await fetch(
-        `https://node-boilerplate-pww8.onrender.com/v1/friends/suggestions`,
+        `https://node-boilerplate-pww8.onrender.com/v1/friends/suggestions?q=${encodeURIComponent(
+          query
+        )}`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
@@ -99,21 +99,32 @@ export function FriendSuggestionsDialog({ forProfilePage = false }: AddFriendDia
     }
   };
 
-  // Open dialog → load
+  // Open dialog → load data
   useEffect(() => {
     if (!open) return;
     fetchWithDelay(loadSuggestions);
   }, [open]);
 
-  // Reload button
+  // Search debounce
+  useEffect(() => {
+    if (!open) return;
+
+    const timer = setTimeout(() => {
+      fetchWithDelay(loadSuggestions);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  // Reload
   const reloadData = () => {
     setIsReloading(true);
     fetchWithDelay(loadSuggestions);
   };
 
-  // ------------------------------------------
-  // Send friend request
-  // ------------------------------------------
+  // -------------------------------------------------
+  // Send Friend Request
+  // -------------------------------------------------
   const handleSendRequest = async (userId: string) => {
     setIsSending(userId);
 
@@ -123,7 +134,6 @@ export function FriendSuggestionsDialog({ forProfilePage = false }: AddFriendDia
       if (res.status === 201) {
         toast.success(res.data.msg);
 
-        // Remove from UI
         setSuggestions((prev) => prev.filter((u) => u._id !== userId));
       } else {
         toast.error("Something went wrong");
@@ -144,10 +154,10 @@ export function FriendSuggestionsDialog({ forProfilePage = false }: AddFriendDia
             Add Friend
           </Button>
         ) : (
-        <Button>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Friend Suggestions
-        </Button>
+          <Button>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Friend Suggestions
+          </Button>
         )}
       </DialogTrigger>
 
@@ -165,16 +175,23 @@ export function FriendSuggestionsDialog({ forProfilePage = false }: AddFriendDia
               size="icon"
               onClick={reloadData}
               disabled={isReloading}
-              className="ml-2"
             >
               <RefreshCw
                 className={`h-4 w-4 ${isReloading ? "animate-spin" : ""}`}
               />
             </Button>
           </div>
+
+          {/* INPUT SEARCH */}
+          <Input
+            placeholder="Tìm người... (q param)"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            // className="mt-3"
+            className="bg-white text-black dark:bg-neutral-900 dark:text-white"
+          />
         </DialogHeader>
 
-        {/* Content */}
         <div className="px-6 space-y-4">
           <div className="space-y-3 max-h-[420px] overflow-y-auto pb-4">
             {isLoading ? (
