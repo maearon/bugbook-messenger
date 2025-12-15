@@ -8,7 +8,7 @@ import { FriendRequests } from "@/components/friends/friend-requests"
 
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, CheckCircle2, MailIcon } from "lucide-react"
-import { ProtectedRoute } from "@/components/auth/protected-route"
+import { ProtectedRoute } from "@/components/auth-old/protected-route"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuthStore } from "@/stores/useAuthStore"

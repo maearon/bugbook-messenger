@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ConversationList } from "@/components/chat/conversation-list"
+import { ConversationList } from "@/components/chat-old/conversation-list"
 import { User, LogOut, Bell, Sun, Moon, Plus, MessageCircle, UserPlus, Loader2, Users, Twitter } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -15,16 +15,16 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { useTheme } from "next-themes";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupAction, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import GroupChatList from "@/components/chat/GroupChatList";
+import GroupChatList from "@/components/chat-old/GroupChatList";
 import { NavUser } from "@/components/sidebar/nav-user";
 import { mapBetterAuthUserToMongoUser } from "@/lib/mappers/user-data-to-simple-user";
 import { FriendRequestsDialog } from "@/components/friends/friend-requests-dialog";
-import CreateNewChat from "@/components/chat/CreateNewChat";
-import NewGroupChatDialog from "@/components/chat/NewGroupChatDialog";
-import AddFriendModal from "@/components/chat/AddFriendModal";
-import DirectMessageList from "@/components/chat/DirectMessageList";
+import CreateNewChat from "@/components/chat-old/CreateNewChat";
+import NewGroupChatDialog from "@/components/chat-old/NewGroupChatDialog";
+import AddFriendModal from "@/components/chat-old/AddFriendModal";
+import DirectMessageList from "@/components/chat-old/DirectMessageList";
 import { useChatStore } from "@/stores/useChatStore";
-import NewDirectChatDialog from "@/components/chat/NewDirectChatDialog";
+import NewDirectChatDialog from "@/components/chat-old/NewDirectChatDialog";
 import { FriendSuggestionsDialog } from "@/components/friends/friend-suggestions-dialog";
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {

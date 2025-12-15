@@ -1,30 +1,22 @@
-import { useChatStore } from '@/stores/useChatStore';
-import React from 'react'
-import GroupChatCard from './GroupChatCard';
+import { useChatStore } from "@/stores/useChatStore";
+import GroupChatCard from "./GroupChatCard";
 
 const GroupChatList = () => {
-  // Lấy đúng field bằng selector
-  const conversations = useChatStore(state => state.conversations);
+  const { conversations } = useChatStore();
 
-  // Bảo vệ kiểu dữ liệu (trong trường hợp persist còn dữ liệu sai)
-  if (!Array.isArray(conversations)) {
-    // bạn có thể hiện placeholder hoặc spinner nếu muốn
-    return null;
-  }
+  if (!conversations) return;
 
-  const groupChats = conversations.filter(conversation => conversation.type === "group");
-
-  if (groupChats.length === 0) {
-    return null;
-  }
-
+  const groupchats = conversations.filter((convo) => convo.type === "group");
   return (
     <div className="flex-1 overflow-y-auto p-2 space-y-2">
-      {groupChats.map((conversation) => (
-        <GroupChatCard key={conversation._id} conversation={conversation} />
+      {groupchats.map((convo) => (
+        <GroupChatCard
+          convo={convo}
+          key={convo._id}
+        />
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default GroupChatList
+export default GroupChatList;

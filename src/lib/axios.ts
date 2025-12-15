@@ -1,107 +1,58 @@
-import axios, { type AxiosResponse, type InternalAxiosRequestConfig } from "axios";
-import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "@/lib/token";
+import { useAuthStore } from "@/stores/useAuthStore";
+import axios from "axios";
 
-const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+const BASE_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:5001/api"
+    : "https://moji-realtimechatapp.onrender.com/api"
+
+const api = axios.create({
+  baseURL: BASE_URL,
   withCredentials: true,
-  transformResponse: [
-    (data) => {
-      try {
-        return JSON.parse(data, (key, value) => {
-          if (typeof key === "string" && key.endsWith("At")) return new Date(value);
-          return value;
-        });
-      } catch {
-        return data;
-      }
-    },
-  ],
 });
 
-// 🧩 Request: gắn token nếu có
-axiosInstance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = getAccessToken();
-    if (token && config.headers) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// gắn access token vào req header
+api.interceptors.request.use((config) => {
+  const { accessToken } = useAuthStore.getState();
 
-// ⚙️ Response: gắn thêm _status vào response để dễ xử lý logic
-axiosInstance.interceptors.response.use(
-  (response: AxiosResponse) => {
-    if (response.status === 204) {
-      // 🟢 Không có nội dung, trả về object hợp lệ
-      return {
-        ...response,
-        data: null,
-        _status: 204,
-      };
-    }
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
 
-    if (typeof response.data === "object" && response.data !== null) {
-      return {
-        ...response,
-        _status: response.status,
-      };
-    }
+  return config;
+});
 
-    // nếu là string hay HTML, cứ trả nguyên
-    return {
-      ...response,
-      _status: response.status,
-      data: response.data ?? null,
-    };
-  },
-  (error) => Promise.reject(error)
-);
-
-let isRefreshing = false;
-
-// 🔄 Response error: xử lý refresh token nếu gặp 403
-axiosInstance.interceptors.response.use(
+// tự động gọi refresh api khi access token hết hạn
+api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 403 && !originalRequest._retry) {
-      originalRequest._retry = true;
+    // những api không cần check
+    if (
+      originalRequest.url.includes("/auth/signin") ||
+      originalRequest.url.includes("/auth/signup") ||
+      originalRequest.url.includes("/auth/refresh")
+    ) {
+      return Promise.reject(error);
+    }
 
-      const refreshToken = getRefreshToken();
-      if (!refreshToken) {
-        clearTokens();
-        window.location.href = "/login";
-        return Promise.reject(error);
-      }
+    originalRequest._retryCount = originalRequest._retryCount || 0;
 
-      if (isRefreshing) return Promise.reject(error);
-      isRefreshing = true;
+    if (error.response?.status === 403 && originalRequest._retryCount < 4) {
+      originalRequest._retryCount += 1;
 
       try {
-        const { data } = await axios.post(
-          "/api/v1/auth/refresh-tokens",
-          { refreshToken },
-          { withCredentials: true }
-        );
+        const res = await api.post("/auth/refresh", { withCredentials: true });
+        const newAccessToken = res.data.accessToken;
 
-        const newToken = data?.tokens.access.token;
-        const newRefresh = data?.tokens.refresh.token;
-        if (!newToken) throw new Error("Missing new token");
+        useAuthStore.getState().setAccessToken(newAccessToken);
 
-        setTokens(newToken, newRefresh, !!localStorage.getItem("accessToken"));
-        axiosInstance.defaults.headers["Authorization"] = `Bearer ${newToken}`;
-        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-
-        return axiosInstance(originalRequest);
-      } catch (err) {
-        clearTokens();
-        window.location.href = "/sign-in";
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        useAuthStore.getState().clearState();
+        return Promise.reject(refreshError);
       }
     }
 
@@ -109,4 +60,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance;
+export default api;

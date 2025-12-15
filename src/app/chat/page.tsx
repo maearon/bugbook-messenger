@@ -1,5 +1,5 @@
 "use client";
-import ChatWindowLayout from "@/components/chat/ChatWindowLayout"
+import ChatWindowLayout from "@/components/chat-old/ChatWindowLayout"
 import { AppSidebar } from "@/components/sidebar/app-sidebar"
 import {
   Breadcrumb,

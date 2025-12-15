@@ -1,219 +1,238 @@
-import { create } from "zustand"
-import { persist } from "zustand/middleware"
-import chatService from "@/api/services/chatService"
-import { Conversation } from "@/types/chat/models"
-import { ChatState } from "@/types/store"
-import { useAuthStore } from "./useAuthStore"
+import { chatService } from "@/services/chatService";
+import type { ChatState } from "@/types/store";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { useAuthStore } from "./useAuthStore";
+import { useSocketStore } from "./useSocketStore";
 
 export const useChatStore = create<ChatState>()(
   persist(
     (set, get) => ({
       conversations: [],
-      messages: {}, // { [conversationId]: { items: [], hasMore: true, nextCursor: string | null } }
+      messages: {},
       activeConversationId: null,
-      conversationLoading: false,
+      convoLoading: false, // convo loading
       messageLoading: false,
+      loading: false,
 
-      setActiveConversation: (id) => {
-        set({ activeConversationId: id })
-      },
-
+      setActiveConversation: (id) => set({ activeConversationId: id }),
       reset: () => {
         set({
           conversations: [],
           messages: {},
           activeConversationId: null,
-          conversationLoading: false,
+          convoLoading: false,
           messageLoading: false,
-        })
+        });
       },
-
-      // =============================
-      // FETCH CONVERSATIONS
-      // =============================
       fetchConversations: async () => {
         try {
-          set({ conversationLoading: true })
-          const result = await chatService.fetchConversations()
+          set({ convoLoading: true });
+          const { conversations } = await chatService.fetchConversations();
 
-          let conversationsArray: Conversation[] = []
-
-          if (Array.isArray(result)) {
-            conversationsArray = result
-          } else if (Array.isArray(result?.conversations)) {
-            conversationsArray = result.conversations
-          } else if (Array.isArray(result?.data?.conversations)) {
-            conversationsArray = result.data.conversations
-          } else if (Array.isArray(result?.data)) {
-            conversationsArray = result.data
-          } else {
-            const maybeArray = Object.values(result || {}).find((v) => Array.isArray(v))
-            conversationsArray = maybeArray ?? []
-          }
-
-          set({ conversations: conversationsArray })
-        } catch (err) {
-          console.error("Failed to fetch conversations:", err)
-          set({ conversations: [] })
-        } finally {
-          set({ conversationLoading: false })
+          set({ conversations, convoLoading: false });
+        } catch (error) {
+          console.error("Lỗi xảy ra khi fetchConversations:", error);
+          set({ convoLoading: false });
         }
       },
+      fetchMessages: async (conversationId) => {
+        const { activeConversationId, messages } = get();
+        const { user } = useAuthStore.getState();
 
-      // =============================
-      // FETCH MESSAGES WITH PAGINATION
-      // =============================
-      fetchMessages: async (id, cursor) => {
-        const user = useAuthStore.getState()?.user ?? null
+        const convoId = conversationId ?? activeConversationId;
 
-        const conversationId = id || get().activeConversationId
-        if (!conversationId) return
+        if (!convoId) return;
 
-        const existing = get().messages[conversationId]
+        const current = messages?.[convoId];
+        const nextCursor =
+          current?.nextCursor === undefined ? "" : current?.nextCursor;
 
-        // Không fetch lại nếu không còn trang kế tiếp
-        if (existing?.nextCursor === null) return
+        if (nextCursor === null) return;
 
-        set({ messageLoading: true })
+        set({ messageLoading: true });
 
         try {
-          const response = await chatService.fetchMessages(
-            conversationId,
-            existing?.nextCursor ?? ""
-          )
+          const { messages: fetched, cursor } = await chatService.fetchMessages(
+            convoId,
+            nextCursor
+          );
 
-          if (!response) return
-
-          const { messages: fetched, cursor: next } = response
-
-          const processed = fetched.map((msg) => ({
-            ...msg,
-            isOwn: msg.senderId === user?.id,
-          }))
+          const processed = fetched.map((m) => ({
+            ...m,
+            isOwn: m.senderId === user?._id,
+          }));
 
           set((state) => {
-            const prevItems = state.messages[conversationId]?.items || []
-            const merge = [...processed, ...prevItems]
+            const prev = state.messages[convoId]?.items ?? [];
+            const merged = prev.length > 0 ? [...processed, ...prev] : processed;
 
             return {
               messages: {
                 ...state.messages,
-                [conversationId]: {
-                  items: merge,
-                  hasMore: !!next,
-                  nextCursor: next ?? null,
+                [convoId]: {
+                  items: merged,
+                  hasMore: !!cursor,
+                  nextCursor: cursor ?? null,
                 },
               },
-            }
-          })
-        } catch (err) {
-          console.error("Failed to fetch messages:", err)
+            };
+          });
+        } catch (error) {
+          console.error("Lỗi xảy ra khi fetchMessages:", error);
         } finally {
-          set({ messageLoading: false })
+          set({ messageLoading: false });
         }
       },
-
-      // =============================
-      // SEND MESSAGE (PRIVATE)
-      // =============================
-      sendMessage: async (recipientId, content, imgUrl) => {
+      sendDirectMessage: async (recipientId, content, imgUrl) => {
         try {
-          const { activeConversationId } = get()
-          await chatService.sendMessage(
+          const { activeConversationId } = get();
+          await chatService.sendDirectMessage(
             recipientId,
-            activeConversationId || undefined,
             content,
-            imgUrl
-          )
-
-          // cập nhật UI (optional)
+            imgUrl,
+            activeConversationId || undefined
+          );
           set((state) => ({
             conversations: state.conversations.map((c) =>
-              c._id === activeConversationId
-                ? { ...c, seenBy: [] }
-                : c
+              c._id === activeConversationId ? { ...c, seenBy: [] } : c
             ),
-          }))
-        } catch (err) {
-          console.error("Failed to send message:", err)
+          }));
+        } catch (error) {
+          console.error("Lỗi xảy ra khi gửi direct message", error);
         }
       },
-
-      // =============================
-      // SEND GROUP MESSAGE
-      // =============================
       sendGroupMessage: async (conversationId, content, imgUrl) => {
         try {
-          const { activeConversationId } = get()
-          await chatService.sendGroupMessage(conversationId, content, imgUrl)
-
+          await chatService.sendGroupMessage(conversationId, content, imgUrl);
           set((state) => ({
             conversations: state.conversations.map((c) =>
-              c._id === activeConversationId
-                ? { ...c, seenBy: [] }
-                : c
+              c._id === get().activeConversationId ? { ...c, seenBy: [] } : c
             ),
-          }))
-        } catch (err) {
-          console.error("Failed to send group message:", err)
+          }));
+        } catch (error) {
+          console.error("Lỗi xảy ra gửi group message", error);
         }
       },
-
-      // =============================
-      // ADD MESSAGE FROM SOCKETIO
-      // =============================
       addMessage: async (message) => {
-        const user = useAuthStore.getState()?.user
-        const conversationId = message.conversationId
+        try {
+          const { user } = useAuthStore.getState();
+          const { fetchMessages } = get();
 
-        message.isOwn = message.senderId === user?.id
+          message.isOwn = message.senderId === user?._id;
 
-        const state = get()
-        const existing = state.messages[conversationId]
+          const convoId = message.conversationId;
 
-        // Nếu chưa load messages thì fetch 1 lần
-        if (!existing) {
-          await state.fetchMessages(conversationId)
-        }
+          let prevItems = get().messages[convoId]?.items ?? [];
 
-        set((s) => {
-          const prev = s.messages[conversationId]?.items || []
-
-          // Tránh duplicate message
-          if (prev.some((m) => m._id === message._id)) return s
-
-          return {
-            messages: {
-              ...s.messages,
-              [conversationId]: {
-                items: [...prev, message],
-                hasMore: s.messages[conversationId]?.hasMore ?? false,
-                nextCursor: s.messages[conversationId]?.nextCursor ?? null,
-              },
-            },
+          if (prevItems.length === 0) {
+            await fetchMessages(message.conversationId);
+            prevItems = get().messages[convoId]?.items ?? [];
           }
-        })
-      },
 
-      // =============================
-      // UPDATE CONVERSATION (LAST MESSAGE, SEEN...)
-      // =============================
+          set((state) => {
+            if (prevItems.some((m) => m._id === message._id)) {
+              return state;
+            }
+
+            return {
+              messages: {
+                ...state.messages,
+                [convoId]: {
+                  items: [...prevItems, message],
+                  hasMore: state.messages[convoId].hasMore,
+                  nextCursor: state.messages[convoId].nextCursor ?? undefined,
+                },
+              },
+            };
+          });
+        } catch (error) {
+          console.error("Lỗi xảy khi ra add message:", error);
+        }
+      },
       updateConversation: (conversation) => {
         set((state) => ({
           conversations: state.conversations.map((c) =>
             c._id === conversation._id ? { ...c, ...conversation } : c
           ),
-        }))
+        }));
+      },
+      markAsSeen: async () => {
+        try {
+          const { user } = useAuthStore.getState();
+          const { activeConversationId, conversations } = get();
+
+          if (!activeConversationId || !user) {
+            return;
+          }
+
+          const convo = conversations.find((c) => c._id === activeConversationId);
+
+          if (!convo) {
+            return;
+          }
+
+          if ((convo.unreadCounts?.[user._id] ?? 0) === 0) {
+            return;
+          }
+
+          await chatService.markAsSeen(activeConversationId);
+
+          set((state) => ({
+            conversations: state.conversations.map((c) =>
+              c._id === activeConversationId && c.lastMessage
+                ? {
+                    ...c,
+                    unreadCounts: {
+                      ...c.unreadCounts,
+                      [user._id]: 0,
+                    },
+                  }
+                : c
+            ),
+          }));
+        } catch (error) {
+          console.error("Lỗi xảy ra khi gọi markAsSeen trong store", error);
+        }
+      },
+      addConvo: (convo) => {
+        set((state) => {
+          const exists = state.conversations.some(
+            (c) => c._id.toString() === convo._id.toString()
+          );
+
+          return {
+            conversations: exists
+              ? state.conversations
+              : [convo, ...state.conversations],
+            activeConversationId: convo._id,
+          };
+        });
+      },
+      createConversation: async (type, name, memberIds) => {
+        try {
+          set({ loading: true });
+          const conversation = await chatService.createConversation(
+            type,
+            name,
+            memberIds
+          );
+
+          get().addConvo(conversation);
+
+          useSocketStore
+            .getState()
+            .socket?.emit("join-conversation", conversation._id);
+        } catch (error) {
+          console.error("Lỗi xảy ra khi gọi createConversation trong store", error);
+        } finally {
+          set({ loading: false });
+        }
       },
     }),
-
     {
       name: "chat-storage",
-      partialize: (state) => ({
-        conversations: state.conversations,
-        activeConversationId: state.activeConversationId,
-        messages: state.messages,
-      }),
+      partialize: (state) => ({ conversations: state.conversations }),
     }
   )
-)
+);

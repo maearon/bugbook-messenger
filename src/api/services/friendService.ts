@@ -1,42 +1,45 @@
-import api from "@/api/client";
-
-export interface Friend {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
+import api from "@/lib/axios";
 
 export const friendService = {
-  addFriend: async (userId: string) => {
-    const res = await api.post("/friends/requests", {
-      to: userId,
-      message: "Kết bạn nhé!",
-    });
-
-    return res.data;
+  async searchByUsername(username: string) {
+    const res = await api.get(`/users/search?username=${username}`);
+    return res.data.user;
   },
 
-  getFriendRequests: async () => {
-    const res = await api.get("/friends/requests");
-    return res.data;
+  async sendFriendRequest(to: string, message?: string) {
+    const res = await api.post("/friends/requests", { to, message });
+    return res.data.message;
   },
 
-  responseFriendRequest: async (id: string, action: string) => {
-    const res = await api.post(`/friends/requests/${id}/${action}`);
-    return res.data;
+  async getAllFriendRequest() {
+    try {
+      const res = await api.get("/friends/requests");
+      const { sent, received } = res.data;
+      return { sent, received };
+    } catch (error) {
+      console.error("Lỗi khi gửi getAllFriendRequest", error);
+    }
   },
 
-  /**
-   * GET /friends
-   * - Nếu không truyền q → trả về toàn bộ friend list
-   * - Nếu truyền q → backend sẽ filter theo q
-   */
-  getFriends: async (q?: string): Promise<{ friends: Friend[] }> => {
-    const res = await api.get("/friends", {
-      params: q ? { q } : {},
-    });
+  async acceptRequest(requestId: string) {
+    try {
+      const res = await api.post(`/friends/requests/${requestId}/accept`);
+      return res.data.requestAcceptedBy;
+    } catch (error) {
+      console.error("Lỗi khi gửi acceptRequest", error);
+    }
+  },
 
-    return res.data;
+  async declineRequest(requestId: string) {
+    try {
+      await api.post(`/friends/requests/${requestId}/decline`);
+    } catch (error) {
+      console.error("Lỗi khi gửi declineRequest", error);
+    }
+  },
+
+  async getFriendList() {
+    const res = await api.get("/friends");
+    return res.data.friends;
   },
 };

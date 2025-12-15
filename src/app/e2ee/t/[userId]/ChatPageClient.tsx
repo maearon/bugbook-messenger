@@ -10,7 +10,7 @@ import { Session } from "@/lib/auth"
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./AppSidebar";
 // import ChatWindowLayout from "./ChatWindowLayout";
-import ChatWindowLayout from "@/components/chat/ChatWindowLayout"
+import ChatWindowLayout from "@/components/chat-old/ChatWindowLayout"
 
 interface ChatPageClientProps {
   session: Session | null;

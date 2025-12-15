@@ -1,7 +1,5 @@
 export interface Participant {
   _id: string;
-  name: string;
-  email: string;
   displayName: string;
   avatarUrl?: string | null;
   joinedAt: string;
@@ -32,7 +30,7 @@ export interface LastMessage {
 export interface Conversation {
   _id: string;
   type: "direct" | "group";
-  group?: Group;
+  group: Group;
   participants: Participant[];
   lastMessageAt: string;
   seenBy: SeenUser[];

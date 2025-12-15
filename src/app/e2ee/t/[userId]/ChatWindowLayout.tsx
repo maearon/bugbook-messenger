@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { MessageList } from "@/components/chat/message-list"
-import { MessageInput } from "@/components/chat/message-input"
+import { MessageList } from "@/components/chat-old/message-list"
+import { MessageInput } from "@/components/chat-old/message-input"
 import { MessageCircle } from "lucide-react"
 import { SidebarInset } from "@/components/ui/sidebar"
-import ChatWindowHeader from "@/components/chat/ChatWindowHeader"
+import ChatWindowHeader from "@/components/chat-old/ChatWindowHeader"
 import { useChatStore } from "@/stores/useChatStore"
-import ChatWindowSkeleton from "@/components/chat/ChatWindowSkeleton"
+import ChatWindowSkeleton from "@/components/chat-old/ChatWindowSkeleton"
 
 interface ChatWindowLayoutProps {
   selectedConversationId: string | undefined;

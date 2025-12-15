@@ -1,11 +1,7 @@
-import React from 'react'
+// import React from "react";
 
 const ChatWindowSkeleton = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+  return <div>ChatWindowSkeleton</div>;
+};
 
-export default ChatWindowSkeleton
+export default ChatWindowSkeleton;

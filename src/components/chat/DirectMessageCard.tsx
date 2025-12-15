@@ -1,76 +1,73 @@
-import { useChatStore } from '@/stores/useChatStore';
-import { Conversation } from '@/types/chat/chat'
-import React from 'react'
-import ChatCard from './ChatCard';
-import { authClient } from '@/lib/auth-client';
-import { cn } from '@/lib/utils';
-import UserAvatar from './UserAvatar';
-import StatusBadge from './StatusBadge';
-import UnreadCountBadge from './UnreadCountBadge';
-import { useSocketStore } from '@/stores/useSocketStore';
-// import { useAuthStore } from '@/stores/useAuthStore';
+import type { Conversation } from "@/types/chat";
+import ChatCard from "./ChatCard";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useChatStore } from "@/stores/useChatStore";
+import { cn } from "@/lib/utils";
+import UserAvatar from "./UserAvatar";
+import StatusBadge from "./StatusBadge";
+import UnreadCountBadge from "./UnreadCountBadge";
+import { useSocketStore } from "@/stores/useSocketStore";
 
-const DirectMessageCard = ({conversation}: {conversation: Conversation}) => {
-  // const { user } = useAuthStore();
-  const { data: sessionClient } = authClient.useSession();
-  const user = sessionClient?.user ?? null;
-  const { activeConversationId, setActiveConversation, messages, fetchMessages } = useChatStore();
-  const conversations = useChatStore();
+const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
+  const { user } = useAuthStore();
+  const { activeConversationId, setActiveConversation, messages, fetchMessages } =
+    useChatStore();
   const { onlineUsers } = useSocketStore();
-  if (!user) {
-    return null;
-  }
-  const otherParticipant = conversation.participants.find(participant => participant.email !== user.email);
-  if (!otherParticipant) {
-    return null;
-  }
-  const unreadCount = conversation.unreadCounts[user.id] || 0;
-  const lastMessage = conversation.lastMessage?.content || "No messages yet";
+
+  if (!user) return null;
+
+  const otherUser = convo.participants.find((p) => p._id !== user._id);
+  if (!otherUser) return null;
+
+  const unreadCount = convo.unreadCounts[user._id];
+  const lastMessage = convo.lastMessage?.content ?? "";
+
   const handleSelectConversation = async (id: string) => {
     setActiveConversation(id);
     if (!messages[id]) {
-      await fetchMessages(id);
+      await fetchMessages();
     }
   };
-  if (!conversations) {
-    return;
-  }
-  // const groupChats = conversations.conversations.filter(conv => conv.type === "group");
+
   return (
     <ChatCard
-      key={conversation._id}
-      conversationId={conversation._id}
-      name={otherParticipant.name ?? "Unknown User"}
-      timeStamp={
-        conversation.lastMessage?.createdAt 
-          ? new Date(conversation.lastMessage.createdAt) 
+      convoId={convo._id}
+      name={otherUser.displayName ?? ""}
+      timestamp={
+        convo.lastMessage?.createdAt
+          ? new Date(convo.lastMessage.createdAt)
           : undefined
       }
-      isActive={activeConversationId === conversation._id}
+      isActive={activeConversationId === convo._id}
+      onSelect={handleSelectConversation}
       unreadCount={unreadCount}
-      onSelect={() => handleSelectConversation(conversation._id)}
       leftSection={
         <>
-          <UserAvatar type="sidebar" name={otherParticipant.name ?? ""} 
-            avatarUrl={otherParticipant.avatarUrl ?? undefined}
+          <UserAvatar
+            type="sidebar"
+            name={otherUser.displayName ?? ""}
+            avatarUrl={otherUser.avatarUrl ?? undefined}
           />
-          <StatusBadge 
-            status={onlineUsers.includes(otherParticipant?._id ?? "") ? "online" : "offline"}
+          <StatusBadge
+            status={
+              onlineUsers.includes(otherUser?._id ?? "") ? "online" : "offline"
+            }
           />
-          {
-            Boolean(unreadCount && unreadCount > 0) && (
-              <UnreadCountBadge unreadCount={unreadCount} />
-            )
-          }
+          {unreadCount > 0 && <UnreadCountBadge unreadCount={unreadCount} />}
         </>
       }
       subtitle={
-        <p className={cn("text-sm truncate", Boolean(unreadCount && unreadCount > 0) ? "font-medium text-foreground" : "text-muted-foreground")}>
+        <p
+          className={cn(
+            "text-sm truncate",
+            unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground"
+          )}
+        >
           {lastMessage}
         </p>
       }
     />
-  )
-}
+  );
+};
 
-export default DirectMessageCard
+export default DirectMessageCard;

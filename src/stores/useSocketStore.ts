@@ -1,14 +1,10 @@
-import { LastMessage } from './../types/chat/chat';
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { io, type Socket } from "socket.io-client"
-import type { SocketState } from '@/types/store';
-import { useAuthStore } from "@/stores/useAuthStore";
-import { useChatStore } from './useChatStore';
+import { create } from "zustand";
+import { io, type Socket } from "socket.io-client";
+import { useAuthStore } from "./useAuthStore";
+import type { SocketState } from "@/types/store";
+import { useChatStore } from "./useChatStore";
 
-const CHAT_SERVICE_URL = process.env.NODE_ENV === "development"
-  ? "http://localhost:5001"
-  : "https://node-boilerplate-pww8.onrender.com"
+const baseURL = import.meta.env.VITE_SOCKET_URL;
 
 export const useSocketStore = create<SocketState>((set, get) => ({
   socket: null,
@@ -16,62 +12,77 @@ export const useSocketStore = create<SocketState>((set, get) => ({
   connectSocket: () => {
     const accessToken = useAuthStore.getState().accessToken;
     const existingSocket = get().socket;
-    if (existingSocket) return;
-    const socket: Socket = io(CHAT_SERVICE_URL, {
+
+    if (existingSocket) return; // tránh tạo nhiều socket
+
+    const socket: Socket = io(baseURL, {
       auth: { token: accessToken },
-      transports: ['websocket', 'polling']
-    })
-    set({socket});
-    // Connection events
-    socket.on('connect', () => {
-      console.log('✅ Connected to chat service')
-      // setIsConnected(true)
-      // // Join general room
-      // socket.emit('join_room', { roomId: 'general' })
-    })
+      transports: ["websocket"],
+    });
+
+    set({ socket });
+
+    socket.on("connect", () => {
+      console.log("Đã kết nối với socket");
+    });
+
     // online users
-    socket.on('online-users', (userIds) => {
+    socket.on("online-users", (userIds) => {
       set({ onlineUsers: userIds });
-    })
+    });
+
     // new message
-    socket.on('new-message', (message, conversation, unreadCounts) => {
+    socket.on("new-message", ({ message, conversation, unreadCounts }) => {
       useChatStore.getState().addMessage(message);
+
       const lastMessage = {
         _id: conversation.lastMessage._id,
         content: conversation.lastMessage.content,
-        createAt: conversation.lastMessage.createAt,
+        createdAt: conversation.lastMessage.createdAt,
         sender: {
           _id: conversation.lastMessage.senderId,
           displayName: "",
           avatarUrl: null,
-        }
+        },
       };
-      const updateConversation = {
+
+      const updatedConversation = {
         ...conversation,
         lastMessage,
         unreadCounts,
-      }
+      };
+
       if (useChatStore.getState().activeConversationId === message.conversationId) {
-
+        useChatStore.getState().markAsSeen();
       }
-      useChatStore.getState().updateConversation(updateConversation);
-    })
-  },
 
+      useChatStore.getState().updateConversation(updatedConversation);
+    });
+
+    // read message
+    socket.on("read-message", ({ conversation, lastMessage }) => {
+      const updated = {
+        _id: conversation._id,
+        lastMessage,
+        lastMessageAt: conversation.lastMessageAt,
+        unreadCounts: conversation.unreadCounts,
+        seenBy: conversation.seenBy,
+      };
+
+      useChatStore.getState().updateConversation(updated);
+    });
+
+    // new group chat
+    socket.on("new-group", (conversation) => {
+      useChatStore.getState().addConvo(conversation);
+      socket.emit("join-conversation", conversation._id);
+    });
+  },
   disconnectSocket: () => {
     const socket = get().socket;
     if (socket) {
-      // socket.off('connect');
-      // socket.off('disconnect');
-      // socket.off('message_history');
-      // socket.off('new-message');
-      // socket.off('user_typing');
-      // socket.off('error');
-
-      socket.disconnect()
-      // socketRef.current = null
-      // setIsConnected(false)
-      set({socket: null});
+      socket.disconnect();
+      set({ socket: null });
     }
-  }
+  },
 }));

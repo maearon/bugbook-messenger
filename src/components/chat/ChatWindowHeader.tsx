@@ -1,94 +1,79 @@
 import { useChatStore } from "@/stores/useChatStore";
-import { Conversation } from "@/types/chat"
+import type { Conversation } from "@/types/chat";
 import { SidebarTrigger } from "../ui/sidebar";
-import { authClient } from "@/lib/auth-client";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { Separator } from "../ui/separator";
 import UserAvatar from "./UserAvatar";
+import StatusBadge from "./StatusBadge";
 import GroupChatAvatar from "./GroupChatAvatar";
 import { useSocketStore } from "@/stores/useSocketStore";
-import StatusBadge from "./StatusBadge";
 
-const ChatWindowHeader = ({ chat: propChat }: { chat?: Conversation }) => {
-  const {conversations, activeConversationId} = useChatStore();
-  const { data: sessionClient } = authClient.useSession();
-  const user = sessionClient?.user ?? null;
+const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
+  const { conversations, activeConversationId } = useChatStore();
+  const { user } = useAuthStore();
   const { onlineUsers } = useSocketStore();
-  if (!user) {
-    return null;
-  }
-  const chat = propChat ?? conversations.find(c => c._id === activeConversationId) ?? undefined;
+
+  let otherUser;
+
+  chat = chat ?? conversations.find((c) => c._id === activeConversationId);
 
   if (!chat) {
     return (
       <header className="md:hidden sticky top-0 z-10 flex items-center gap-2 px-4 py-2 w-full">
         <SidebarTrigger className="-ml-1 text-foreground" />
       </header>
-    )
-  }
-
-  // compute otherParticipant in outer scope so it's available in JSX below
-  let otherParticipant: Conversation["participants"][number] | undefined;
-
-  if (chat.type === "direct" && "participants" in chat) {
-    otherParticipant = chat.participants.find(
-      p => p.email !== user?.email
     );
   }
-  
-  if (chat.type === "group") {
-    // return <GroupChatHeader chat={chat} />
-  } else if (chat.type === "direct") {
-    if (!user || !otherParticipant) {
-      return null;
-    }
-    // return <DirectMessageHeader chat={chat} />
+
+  if (chat.type === "direct") {
+    const otherUsers = chat.participants.filter((p) => p._id !== user?._id);
+    otherUser = otherUsers.length > 0 ? otherUsers[0] : null;
+
+    if (!user || !otherUser) return;
   }
+
   return (
-  <header className="sticky top-0 z-10 px-4 py-2 flex items-center bg-background">
-    <div className="flex items-center gap-2 w-full">
-      <SidebarTrigger className="-ml-1 text-foreground" />
-      <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-      <div className="flex flex-col p-2 gap-3 w-full">
-        {/* AvatarImage */}
-        <div className="relative">
-          {
-            chat.type === "direct" ? (
-              // Direct message avatar placeholder
+    <header className="sticky top-0 z-10 px-4 py-2 flex items-center bg-background">
+      <div className="flex items-center gap-2 w-full">
+        <SidebarTrigger className="-ml-1 text-foreground" />
+        <Separator
+          orientation="vertical"
+          className="mr-2 data-[orientation=vertical]:h-4"
+        />
+
+        <div className="p-2 w-full flex items-center gap-3">
+          {/* avatar */}
+          <div className="relative">
+            {chat.type === "direct" ? (
               <>
                 <UserAvatar
                   type={"sidebar"}
-                  name={otherParticipant?.name || "Unknown User"}
-                  avatarUrl={otherParticipant?.avatarUrl || undefined}
+                  name={otherUser?.displayName || "Moji"}
+                  avatarUrl={otherUser?.avatarUrl || undefined}
                 />
-                <StatusBadge 
-                  status={onlineUsers.includes(otherParticipant?._id ?? "") ? "online" : "offline"}
+                {/* todo: socket io */}
+                <StatusBadge
+                  status={
+                    onlineUsers.includes(otherUser?._id ?? "") ? "online" : "offline"
+                  }
                 />
               </>
             ) : (
-              // Group avatar placeholder
-              chat.type === "group" && "participants" in chat && chat.participants ? (
-                <GroupChatAvatar
-                  participants={chat.participants}
-                  type={"sidebar"}
-                />
-              ) : null
-            )
-          }
-        </div>
-        {/* Name */}
-        <h2 className="text-foreground font-semibold">
-          {
-            chat.type === "direct" ? (
-              otherParticipant?.name ?? "Unknown User"
-            ) : (
-              chat.group?.name ?? "Unnamed Group"
-            )
-          }
-        </h2>
-      </div>
-    </div>
-  </header>
-  )
-}
+              <GroupChatAvatar
+                participants={chat.participants}
+                type="sidebar"
+              />
+            )}
+          </div>
 
-export default ChatWindowHeader
+          {/* name */}
+          <h2 className="font-semibold text-foreground">
+            {chat.type === "direct" ? otherUser?.displayName : chat.group?.name}
+          </h2>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default ChatWindowHeader;

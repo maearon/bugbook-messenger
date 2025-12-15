@@ -1,28 +1,39 @@
+"use client"
+
 import type React from "react"
-import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import { Suspense } from "react"
-import { SocketProvider } from "@/lib/socket/socket-context"
-import { AuthProvider } from "@/lib/auth/auth-context"
 import { ReduxProvider } from "@/providers/redux-provider"
 import { ThemeProvider } from "next-themes"
-import { Toaster } from "sonner"
-import ChatWidgetServer from "@/components/chat/ChatWidgetServer"
-
-export const metadata: Metadata = {
-  title: "Moji - Modern Chat App",
-  description: "Connect with friends through Moji chat",
-  generator: "v0.app",
-}
+import { Toaster } from "sonner";
+import { useThemeStore } from "@/stores/useThemeStore";
+import { useEffect } from "react";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useSocketStore } from "@/stores/useSocketStore";
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { isDark, setTheme } = useThemeStore();
+  const { accessToken } = useAuthStore();
+  const { connectSocket, disconnectSocket } = useSocketStore();
+
+  useEffect(() => {
+    setTheme(isDark);
+  }, [isDark]);
+
+  useEffect(() => {
+    if (accessToken) {
+      connectSocket();
+    }
+
+    return () => disconnectSocket();
+  }, [accessToken]);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -36,16 +47,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ReduxProvider>
-            <AuthProvider>
-              <SocketProvider>
-                <Suspense fallback={<div>Loading...</div>}>
-                  {children}
-                  <ChatWidgetServer />
-                </Suspense>
-                <Toaster richColors />
-              </SocketProvider>
-            </AuthProvider>
-
+            {children}
+          <Toaster richColors />
           </ReduxProvider>
         </ThemeProvider>
 

@@ -1,4 +1,4 @@
-import api from "@/api/client";
+import api from "@/lib/axios";
 
 export const authService = {
   signUp: async (
@@ -9,42 +9,34 @@ export const authService = {
     lastName: string
   ) => {
     const res = await api.post(
-      "/auth/register",
-      { fullName: firstName + lastName, email, password }
+      "/auth/signup",
+      { username, password, email, firstName, lastName },
+      { withCredentials: true }
     );
 
     return res.data;
   },
 
-  signIn: async (email: string, password: string) => {
+  signIn: async (username: string, password: string) => {
     const res = await api.post(
-      "/auth/login",
-      { email, password }
+      "auth/signin",
+      { username, password },
+      { withCredentials: true }
     );
-    return {
-      user: res.data.user,
-      accessToken: res.data.tokens.access.token,
-      refreshToken: res.data.tokens.refresh.token,
-    };
+    return res.data; // access token
   },
 
-  signOut: async (refreshToken: string) => {
-    return api.post(
-      "/auth/logout",
-      { refreshToken }
-    );
+  signOut: async () => {
+    return api.post("/auth/signout", { withCredentials: true });
   },
 
   fetchMe: async () => {
-    const res = await api.get("/auth/me");
+    const res = await api.get("/users/me", { withCredentials: true });
     return res.data.user;
   },
 
-  refresh: async (refreshToken: string) => {
-    const res = await api.post(
-      "/auth/refresh-tokens",
-      { refreshToken }
-    );
+  refresh: async () => {
+    const res = await api.post("/auth/refresh", { withCredentials: true });
     return res.data.accessToken;
   },
 };
