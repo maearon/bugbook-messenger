@@ -1,27 +1,41 @@
+"use client";
+
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useEffect, useState } from "react";
-import { Navigate, Outlet } from "react-router";
+import { useRouter } from "next/navigation";
 
-const ProtectedRoute = () => {
+export default function ProtectedRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { accessToken, user, loading, refresh, fetchMe } = useAuthStore();
   const [starting, setStarting] = useState(true);
-
-  const init = async () => {
-    // có thể xảy ra khi refresh trang
-    if (!accessToken) {
-      await refresh();
-    }
-
-    if (accessToken && !user) {
-      await fetchMe();
-    }
-
-    setStarting(false);
-  };
+  const router = useRouter();
 
   useEffect(() => {
+    const init = async () => {
+      let token = accessToken;
+      // có thể xảy ra khi refresh trang
+      if (!accessToken) {
+        token = await refresh();
+      }
+
+      if (token && !user) {
+        await fetchMe();
+      }
+
+      setStarting(false);
+    };
+
     init();
   }, []);
+
+  useEffect(() => {
+    if (!starting && !loading && !accessToken) {
+      router.push("/signin");
+    }
+  }, [starting, loading, accessToken]);
 
   if (starting || loading) {
     return (
@@ -31,16 +45,5 @@ const ProtectedRoute = () => {
     );
   }
 
-  if (!accessToken) {
-    return (
-      <Navigate
-        to="/signin"
-        replace
-      />
-    );
-  }
-
-  return <Outlet></Outlet>;
-};
-
-export default ProtectedRoute;
+  return <>{children}</>;
+}
