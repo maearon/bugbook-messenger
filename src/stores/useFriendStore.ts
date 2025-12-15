@@ -1,4 +1,4 @@
-import { friendService } from "@/services/friendService";
+import { friendService } from "@/api/services/friendService";
 import type { FriendState } from "@/types/store";
 import { create } from "zustand";
 
