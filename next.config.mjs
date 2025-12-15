@@ -18,7 +18,6 @@ const nextConfig = {
   turbopack: {},   // ✅ REQUIRED for Next.js 16
 
   images: {
-    domains: ["blob.v0.dev"],
     unoptimized: true,
     remotePatterns: [
       {

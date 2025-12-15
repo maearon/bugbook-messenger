@@ -291,7 +291,27 @@
 
   /* Scrollbar */
   .beautiful-scrollbar {
-    @apply scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent dark:scrollbar-thumb-slate-600;
+    scrollbar-width: thin;               /* Firefox */
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  /* Chrome / Edge / Safari */
+  .beautiful-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .beautiful-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .beautiful-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+  }
+
+  .dark .beautiful-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
   }
 
   /* Animations */
