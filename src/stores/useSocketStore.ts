@@ -4,7 +4,10 @@ import { useAuthStore } from "./useAuthStore";
 import type { SocketState } from "@/types/store";
 import { useChatStore } from "./useChatStore";
 
-const baseURL = import.meta.env.VITE_SOCKET_URL;
+const baseURL = 
+  typeof window !== "undefined"
+    ? process.env.VITE_SOCKET_URL
+    : undefined;
 
 export const useSocketStore = create<SocketState>((set, get) => ({
   socket: null,
