@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "../ui/button";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { LogOut } from "lucide-react";
