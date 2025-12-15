@@ -229,7 +229,9 @@
 
   /* Chat bubble variants */
   .chat-bubble-sent {
-    @apply bg-primary/80! text-[hsl(var(--chat-bubble-sent-foreground))]! shadow-[var(--shadow-bubble)];
+    background-color: hsl(var(--primary) / 0.8) !important;
+    color: hsl(var(--chat-bubble-sent-foreground)) !important;
+    box-shadow: var(--shadow-bubble);
   }
 
   .chat-bubble-received {
@@ -351,6 +353,8 @@
 }
 
 @theme inline {
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
   --color-border: hsl(var(--border));
