@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "../ui/label";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useNavigate } from "react-router";
+import { useRouter } from "next/navigation"
 
 const signUpSchema = z.object({
   firstname: z.string().min(1, "Tên bắt buộc phải có"),
@@ -21,7 +21,7 @@ type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
   const { signUp } = useAuthStore();
-  const navigate = useNavigate();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -36,7 +36,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
     // gọi backend để signup
     await signUp(username, password, email, firstname, lastname);
 
-    navigate("/signin");
+    router.push("/signin");
   };
 
   return (
