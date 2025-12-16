@@ -12,19 +12,36 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Twitter } from "lucide-react";
 import { Switch } from "../ui/switch";
 import CreateNewChat from "../chat/CreateNewChat";
 import NewGroupChatModal from "../chat/NewGroupChatModal";
 import GroupChatList from "../chat/GroupChatList";
 import AddFriendModal from "../chat/AddFriendModal";
 import DirectMessageList from "../chat/DirectMessageList";
-import { useThemeStore } from "@/stores/useThemeStore";
+import { registerNextThemeSetter, useThemeStore } from "@/stores/useThemeStore";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { Button } from "../ui/button";
+import { useTheme } from "next-themes";
+import { useEffect } from "react";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { isDark, toggleTheme } = useThemeStore();
+  const { isDark, setTheme: setZustandTheme } = useThemeStore();
   const { user } = useAuthStore();
+  const { theme, setTheme } = useTheme();
+  useEffect(() => {
+    // Ưu tiên next-themes => sync vào Zustand
+    if (theme) {
+      setZustandTheme(theme === "dark");
+    }
+  }, [theme, setZustandTheme]);
+  // Bridge: đăng ký setter của next-themes cho Zustand
+  useEffect(() => {
+    registerNextThemeSetter(setTheme);
+  }, [setTheme]);
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
 
   return (
     <Sidebar
@@ -44,13 +61,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="flex w-full items-center px-2 justify-between">
                   <h1 className="text-xl font-bold text-white">Moji</h1>
                   <div className="flex items-center gap-2">
-                    <Sun className="size-4 text-white/80" />
-                    <Switch
-                      checked={isDark}
-                      onCheckedChange={toggleTheme}
-                      className="data-[state=checked]:bg-background/80"
-                    />
-                    <Moon className="size-4 text-white/80" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => window.open("https://ruby-rails-boilerplate.vercel.app", "_blank")}
+                      className="h-8 w-8 text-white hover:bg-white/20"
+                    >
+                      <Twitter className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 text-white hover:bg-white/20">
+                      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    </Button>
                   </div>
                 </div>
               </a>

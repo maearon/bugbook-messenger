@@ -6,9 +6,9 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { ReduxProvider } from "@/providers/redux-provider"
-import { ThemeProvider } from "next-themes"
+import { ThemeProvider, useTheme } from "next-themes"
 import { Toaster } from "sonner";
-import { useThemeStore } from "@/stores/useThemeStore";
+import { registerNextThemeSetter, useThemeStore } from "@/stores/useThemeStore";
 import { useEffect } from "react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useSocketStore } from "@/stores/useSocketStore";
@@ -18,13 +18,30 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { isDark, setTheme } = useThemeStore();
+  // const { isDark, setTheme } = useThemeStore();
   const { accessToken } = useAuthStore();
   const { connectSocket, disconnectSocket } = useSocketStore();
 
+  const { isDark, setTheme: setZustandTheme } = useThemeStore();
+  const { user } = useAuthStore();
+  const { theme, setTheme } = useTheme();
   useEffect(() => {
-    setTheme(isDark);
-  }, [isDark]);
+    // Ưu tiên next-themes => sync vào Zustand
+    if (theme) {
+      setZustandTheme(theme === "dark");
+    }
+  }, [theme, setZustandTheme]);
+  // Bridge: đăng ký setter của next-themes cho Zustand
+  useEffect(() => {
+    registerNextThemeSetter(setTheme);
+  }, [setTheme]);
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
+
+  // useEffect(() => {
+  //   setTheme(isDark);
+  // }, [isDark]);
 
   useEffect(() => {
     if (accessToken) {
