@@ -25,7 +25,7 @@ const NewGroupChatModal = () => {
   const [search, setSearch] = useState("");
   const { friends, getFriends } = useFriendStore();
   const [invitedUsers, setInvitedUsers] = useState<Friend[]>([]);
-  const { loading, createConversation } = useChatStore();
+  const { loading, createConversation, setActiveConversation, messages, fetchMessages } = useChatStore();
 
   const handleGetFriends = async () => {
     await getFriends();
@@ -48,11 +48,16 @@ const NewGroupChatModal = () => {
         return;
       }
 
-      await createConversation(
+      const id = await createConversation(
         "group",
         groupName,
         invitedUsers.map((u) => u._id)
       );
+      if (!id) return;
+      setActiveConversation(id);
+      if (!messages[id]) {
+        await fetchMessages(id);
+      }
 
       setSearch("");
       setInvitedUsers([]);

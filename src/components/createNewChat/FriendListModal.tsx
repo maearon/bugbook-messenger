@@ -7,10 +7,15 @@ import { useChatStore } from "@/stores/useChatStore";
 
 const FriendListModal = () => {
   const { friends } = useFriendStore();
-  const { createConversation } = useChatStore();
+  const { createConversation, setActiveConversation, messages, fetchMessages } = useChatStore();
 
   const handleAddConversation = async (friendId: string) => {
-    await createConversation("direct", "", [friendId]);
+    const id = await createConversation("direct", "", [friendId]);
+    if (!id) return;
+    setActiveConversation(id);
+    if (!messages[id]) {
+      await fetchMessages(id);
+    }
   };
 
   return (

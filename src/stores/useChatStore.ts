@@ -226,8 +226,11 @@ export const useChatStore = create<ChatState>()(
           useSocketStore
             .getState()
             .socket?.emit("join-conversation", conversation._id);
+
+          return conversation._id
         } catch (error) {
           console.error("Lỗi xảy ra khi gọi createConversation trong store", error);
+          throw error;
         } finally {
           set({ loading: false });
         }
