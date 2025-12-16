@@ -234,8 +234,8 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
         </CardContent>
       </Card>
       <div className=" text-xs text-balance px-6 text-center *:[a]:hover:text-primary text-muted-foreground *:[a]:underline *:[a]:underline-offetset-4">
-        Bằng cách tiếp tục, bạn đồng ý với <Link href="/">Điều khoản dịch vụ</Link> và{" "}
-        <Link href="/">Chính sách bảo mật</Link> của chúng tôi.
+        Bằng cách tiếp tục, bạn đồng ý với <Link href="/terms">Điều khoản dịch vụ</Link> và{" "}
+        <Link href="/privacy">Chính sách bảo mật</Link> của chúng tôi.
       </div>
     </div>
   );
