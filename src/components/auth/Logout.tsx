@@ -1,11 +1,14 @@
 "use client"
 
+import { useTranslations } from "@/hooks/useTranslations";
 import { Button } from "../ui/button";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation"
+import { LoadingDots } from "../products/enhanced-product-form";
 
 const Logout = () => {
+  const t = useTranslations("auth");
   const { signOut } = useAuthStore();
   const router = useRouter();
   const handleLogout = async () => {
@@ -21,9 +24,10 @@ const Logout = () => {
     <Button
       variant="completeGhost"
       onClick={handleLogout}
+      className="w-full justify-start"
     >
       <LogOut className="text-destructive" />
-      Log out
+      {t?.logOut || "Log out"}
     </Button>
   );
 };

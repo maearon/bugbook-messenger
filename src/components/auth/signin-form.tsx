@@ -137,7 +137,7 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
               {/* nút đăng nhập */}
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full text-muted-foreground"
                 disabled={isSubmitting}
               >
                 Đăng nhập
@@ -145,12 +145,12 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
 
               <div className="text-center text-sm">
                 Chưa có tài khoản?{" "}
-                <a
+                <Link
                   href="/signup"
                   className="underline underline-offset-4"
                 >
                   Đăng ký
-                </a>
+                </Link>
               </div>
             </div>
           </form>
@@ -166,8 +166,8 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
         </CardContent>
       </Card>
       <div className=" text-xs text-balance px-6 text-center *:[a]:hover:text-primary text-muted-foreground *:[a]:underline *:[a]:underline-offetset-4">
-        Bằng cách tiếp tục, bạn đồng ý với <a href="#">Điều khoản dịch vụ</a> và{" "}
-        <a href="#">Chính sách bảo mật</a> của chúng tôi.
+        Bằng cách tiếp tục, bạn đồng ý với <Link href="#">Điều khoản dịch vụ</Link> và{" "}
+        <Link href="#">Chính sách bảo mật</Link> của chúng tôi.
       </div>
     </div>
   );
