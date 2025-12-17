@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 // import PromoScreen from "./PromoScreen";
-import { Loader2 } from "lucide-react";
+import { Loading } from "../loading";
 
 export default function ProtectedRoute({
   children,
@@ -44,9 +44,7 @@ export default function ProtectedRoute({
       <div className="flex h-screen items-center justify-center">
         {/* Đang tải trang... */}
         {/* <PromoScreen /> */}
-        <div className="flex h-full w-full items-center justify-center">
-          <Loader2 className="size-8 animate-spin text-purple-600" />
-        </div>
+        <Loading />
       </div>
     );
   }
