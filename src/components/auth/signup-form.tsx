@@ -205,7 +205,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
               {/* nút đăng ký */}
               <Button
                 type="submit"
-                className="w-full text-muted-foreground"
+                className="w-full text-white"
                 disabled={isSubmitting}
               >
                 Tạo tài khoản
