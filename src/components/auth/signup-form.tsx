@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "../ui/label";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "@/hooks/useTranslations";
@@ -30,49 +30,48 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
   const t = useTranslations("auth");
   const { signUp } = useAuthStore();
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
   });
 
   const onSubmit = async (data: SignUpFormValues) => {
-    const { firstname, lastname, username, email, password } = data;
+    try {
+      const { firstname, lastname, username, email, password } = data;
 
-    // gọi backend để signup
-    await signUp(username, password, email, firstname, lastname);
+      await signUp(username, password, email, firstname, lastname);
 
-    router.push("/signin");
+      // ✅ CHỈ redirect khi signup thành công
+      router.push("/signin");
+    } catch (err: any) {
+      /**
+       * Giả sử backend trả:
+       * { message: "username đã tồn tại" }
+       * hoặc bạn throw new Error(message) trong store
+       */
+      setError("root", {
+        type: "server",
+        message: err?.message || "Đăng ký thất bại",
+      });
+    }
   };
 
   return (
-    <div
-      className={cn("flex flex-col gap-6", className)}
-      {...props}
-    >
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0 border-border">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form
-            className="p-6 md:p-8"
-            onSubmit={handleSubmit(onSubmit)}
-          >
+          <form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-6">
-              {/* header - logo */}
+
+              {/* header */}
               <div className="flex flex-col items-center text-center gap-2">
-                <Link
-                  href="/"
-                  className="mx-auto block w-fit text-center"
-                >
-                  {/* <Image
-                    src="/favicon.ico"
-                    alt="logo"
-                    width={51}
-                    height={40}
-                    unoptimized
-                  /> */}
+                <Link href="/" className="mx-auto block w-fit text-center">
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-500">
                     <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -86,62 +85,41 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
                 </Link>
 
                 <h1 className="text-2xl font-bold">Tạo tài khoản Moji</h1>
-                <p className="text-muted-foreground text-balance">
+                <p className="text-muted-foreground">
                   Chào mừng bạn! Hãy đăng ký để bắt đầu!
                 </p>
               </div>
 
+              {/* 🔴 ERROR API (GLOBAL) */}
+              {errors.root && (
+                <p className="text-sm text-red-500 text-center">
+                  {errors.root.message}
+                </p>
+              )}
+
               {/* họ & tên */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="lastname"
-                    className="block text-sm"
-                  >
-                    Họ
-                  </Label>
-                  <Input
-                    type="text"
-                    id="lastname"
-                    {...register("lastname")}
-                  />
-
-                  {errors.lastname && (
-                    <p className="error-message">{errors.lastname.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="fistname"
-                    className="block text-sm"
-                  >
-                    Tên
-                  </Label>
-                  <Input
-                    type="text"
-                    id="firstname"
-                    {...register("firstname")}
-                  />
+                  <Label htmlFor="firstname">Tên</Label>
+                  <Input id="firstname" {...register("firstname")} />
                   {errors.firstname && (
                     <p className="error-message">{errors.firstname.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lastname">Họ</Label>
+                  <Input id="lastname" {...register("lastname")} />
+                  {errors.lastname && (
+                    <p className="error-message">{errors.lastname.message}</p>
                   )}
                 </div>
               </div>
 
               {/* username */}
               <div className="flex flex-col gap-3">
-                <Label
-                  htmlFor="username"
-                  className="block text-sm"
-                >
-                  Tên đăng nhập
-                </Label>
-                <Input
-                  type="text"
-                  id="username"
-                  placeholder="moji"
-                  {...register("username")}
-                />
+                <Label htmlFor="username">Tên đăng nhập</Label>
+                <Input id="username" {...register("username")} />
                 {errors.username && (
                   <p className="error-message">{errors.username.message}</p>
                 )}
@@ -149,18 +127,8 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 
               {/* email */}
               <div className="flex flex-col gap-3">
-                <Label
-                  htmlFor="email"
-                  className="block text-sm"
-                >
-                  Email
-                </Label>
-                <Input
-                  type="email"
-                  id="email"
-                  placeholder="m@gmail.com"
-                  {...register("email")}
-                />
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" {...register("email")} />
                 {errors.email && (
                   <p className="error-message">{errors.email.message}</p>
                 )}
@@ -168,75 +136,53 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 
               {/* password */}
               <div className="flex flex-col gap-3">
-                <Label
-                  htmlFor="password"
-                  className="block text-sm"
-                >
-                  Mật khẩu
-                </Label>
+                <Label htmlFor="password">Mật khẩu</Label>
                 <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  {...register("password")}
-                  className="pr-20"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2 text-muted-foreground text-xs"
-                >
-                  {showPassword ? (
-                    <>
-                      <EyeOff className="inline-block w-4 h-4 mr-1" /> {t?.hide || "HIDE"}
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="inline-block w-4 h-4 mr-1" /> {t?.show || "SHOW"}
-                    </>
-                  )}
-                </button>
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    {...register("password")}
+                    className="pr-20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2 text-muted-foreground text-xs"
+                  >
+                    {showPassword ? (
+                      <>
+                        <EyeOff className="inline-block w-4 h-4 mr-1" /> {t?.hide || "HIDE"}
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="inline-block w-4 h-4 mr-1" /> {t?.show || "SHOW"}
+                      </>
+                    )}
+                  </button>
                 </div>
                 {errors.password && (
                   <p className="error-message">{errors.password.message}</p>
                 )}
               </div>
 
-              {/* nút đăng ký */}
-              <Button
-                type="submit"
-                className="w-full text-white"
-                disabled={isSubmitting}
-              >
+              <Button type="submit" disabled={isSubmitting}>
                 Tạo tài khoản
               </Button>
 
               <div className="text-center text-sm">
                 Đã có tài khoản?{" "}
-                <Link
-                  href="/signin"
-                  className="underline underline-offset-4"
-                >
+                <Link href="/signin" className="underline">
                   Đăng nhập
                 </Link>
               </div>
             </div>
           </form>
+
           <div className="bg-muted relative hidden md:block">
-            <Image
-              src="/placeholder.png"
-              alt="Image"
-              className="object-contain"
-              fill
-              priority
-            />
+            <Image src="/placeholder.png" alt="Image" fill priority />
           </div>
         </CardContent>
       </Card>
-      <div className=" text-xs text-balance px-6 text-center *:[a]:hover:text-primary text-muted-foreground *:[a]:underline *:[a]:underline-offetset-4">
-        Bằng cách tiếp tục, bạn đồng ý với <Link href="/terms">Điều khoản dịch vụ</Link> và{" "}
-        <Link href="/privacy">Chính sách bảo mật</Link> của chúng tôi.
-      </div>
     </div>
   );
 }
