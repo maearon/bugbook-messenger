@@ -27,6 +27,7 @@ interface AddFriendDialogProps {
 interface SuggestionUser {
   _id: string;
   name: string;
+  username?: string;
   email: string;
   avatar?: string;
   isFriend?: boolean;
@@ -100,7 +101,7 @@ export function FriendSuggestionsDialog({
 
       const normalized = (response.users || []).map((u: any) => ({
         _id: u._id,
-        username: u.username,
+        username: u.username || u.email.split("@")[0],
         name: u.name || u.displayName,
         email: u.email,
         avatar: u.avatar,
@@ -249,6 +250,9 @@ export function FriendSuggestionsDialog({
 
                   <div className="flex-1">
                     <p className="font-semibold">{user.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      @{user.username}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {user.email}
                     </p>
