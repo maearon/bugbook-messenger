@@ -162,10 +162,9 @@ export function FriendRequestsDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <UserCheck className="mr-2 h-4 w-4" />
-          Friend Requests
-        </Button>
+        <div className="flex justify-center items-center size-5 rounded-full hover:bg-sidebar-accent cursor-pointer z-10">
+          <UserCheck className="size-4" />
+        </div>
       </DialogTrigger>
 
       <DialogContent className="max-w-md rounded-2xl p-0">

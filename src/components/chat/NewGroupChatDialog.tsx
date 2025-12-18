@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Loader2, Users, RefreshCw, X } from "lucide-react";
+import { Search, Loader2, Users, RefreshCw, X, SquarePen } from "lucide-react";
 import { toast } from "sonner";
 import { friendService } from "@/api/services/friendService";
 // import { chatService } from "@/api/services/chatService";
@@ -188,10 +188,9 @@ export default function NewGroupChatDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Users className="mr-2 h-4 w-4" />
-          Add Group
-        </Button>
+        <div className="flex justify-center items-center size-5 rounded-full hover:bg-sidebar-accent cursor-pointer z-10">
+          <SquarePen className="size-4" />
+        </div>
       </DialogTrigger>
 
       <DialogContent>

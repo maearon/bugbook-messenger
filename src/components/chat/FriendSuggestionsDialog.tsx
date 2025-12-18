@@ -182,10 +182,9 @@ export function FriendSuggestionsDialog({
             Add Friend
           </Button>
         ) : (
-          <Button>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Friend Suggestions
-          </Button>
+          <div className="flex justify-center items-center size-5 rounded-full hover:bg-sidebar-accent cursor-pointer z-10">
+            <UserSearch className="size-4" />
+          </div>
         )}
       </DialogTrigger>
 

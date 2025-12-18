@@ -1,3 +1,5 @@
+"user client"
+
 import { NavUser } from "@/components/sidebar/nav-user";
 import {
   Sidebar,
@@ -15,6 +17,7 @@ import {
 import { Moon, Sun, Bug } from "lucide-react";
 import { Switch } from "../ui/switch";
 import CreateNewChat from "../chat/CreateNewChat";
+import CreateNewChatDialog from "@/components/chat/CreateNewChatDialog";
 import NewDirectChatDialog from "@/components/chat/NewDirectChatDialog";
 import NewGroupChatModal from "../chat/NewGroupChatModal";
 import NewGroupChatDialog from "@/components/chat/NewGroupChatDialog";
@@ -27,7 +30,7 @@ import { registerNextThemeSetter, useThemeStore } from "@/stores/useThemeStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { Button } from "../ui/button";
 import { useTheme } from "next-themes";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
@@ -35,6 +38,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isDark, setTheme: setZustandTheme } = useThemeStore();
   const { user } = useAuthStore();
   const { theme, setTheme } = useTheme();
+  const [hasNotification, setHasNotification] = useState(true);
+  const [notificationCount, setNotificationCount] = useState(1);
   useEffect(() => {
     // Ưu tiên next-themes => sync vào Zustand
     if (theme) {
@@ -67,14 +72,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="flex w-full items-center px-2 justify-between">
                   <h1 className="text-xl font-bold text-white">Chats</h1>
                   <div className="flex items-center gap-2">
-                    {/* <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => window.open("https://ruby-rails-boilerplate.vercel.app", "_blank")}
-                      className="h-8 w-8 text-white hover:bg-white/20"
-                    >
-                      <Bug className="h-4 w-4" />
-                    </Button> */}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -89,10 +86,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           className="h-8 w-8 text-white hover:bg-white/20"
                         >
                           <Bug
-                            className="h-4 w-4 fill-[#16A349] text-[#16A349]"
-                            // style={{
-                            //   color: isDark ? "#21C55E" : "#16A349",
-                            // }}
+                            className="h-4 w-4"
                           />
                         </Button>
                       </TooltipTrigger>
@@ -100,6 +94,68 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         Bugbook · 1 notification
                       </TooltipContent>
                     </Tooltip>
+                    {/* <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => window.open("https://ruby-rails-boilerplate.vercel.app", "_blank")}
+                      className="h-8 w-8 text-white hover:bg-white/20"
+                    >
+                      <Bug className="h-4 w-4" />
+                    </Button> */}
+                    {/* <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            window.open(
+                              "https://ruby-rails-boilerplate.vercel.app",
+                              "_blank"
+                            )
+                          }
+                          className="relative h-8 w-8 hover:bg-white/20"
+                        >
+                          <span className="
+                            absolute 
+                            inset-0 
+                            rounded-full 
+                            border 
+                            border-white/40
+                          " />
+
+                          <Bug className="relative h-4 w-4 text-[#22C55E]" />
+
+                          {hasNotification && (
+                            <span
+                              className="
+                                absolute 
+                                -top-0.5 
+                                -right-0.5 
+                                min-w-[16px]
+                                h-4 
+                                px-1
+                                flex 
+                                items-center 
+                                justify-center
+                                rounded-full
+                                bg-[#31A24C]
+                                text-[10px]
+                                font-semibold
+                                text-white
+                                ring-2 
+                                ring-[#0f172a]
+                              "
+                            >
+                              {notificationCount}
+                            </span>
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+
+                      <TooltipContent side="top" align="center">
+                        Bugbook · {notificationCount} notification
+                      </TooltipContent>
+                    </Tooltip> */}
                     <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 text-white hover:bg-white/20">
                       {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                     </Button>
@@ -113,6 +169,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       {/* Content */}
       <SidebarContent className="beautiful-scrollbar">
+        {/* Dirrect Message */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="uppercase">bạn bè</SidebarGroupLabel>
+          <SidebarGroupAction
+            title="Search Messenger"
+            className="cursor-pointer"
+          >
+            <CreateNewChatDialog />
+            <FriendSuggestionsDialog />
+            <AddFriendModal />
+            
+          </SidebarGroupAction>
+
+          <SidebarGroupContent>
+            <DirectMessageList />
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Group Chat */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="uppercase">nhóm chat</SidebarGroupLabel>
+          <SidebarGroupAction
+            title="Tạo Nhóm"
+            className="cursor-pointer"
+          >
+            <NewGroupChatModal />
+            <NewGroupChatDialog />
+          </SidebarGroupAction>
+
+          <SidebarGroupContent>
+            <GroupChatList />
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {/* New Chat */}
         <SidebarGroup>
           <SidebarGroupContent>
@@ -139,38 +229,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupAction title="Friends Requests" className="cursor-pointer">
             <FriendRequestsDialog />
           </SidebarGroupAction>
-        </SidebarGroup>
-
-        {/* Dirrect Message */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="uppercase">bạn bè</SidebarGroupLabel>
-          <SidebarGroupAction
-            title="Kết Bạn"
-            className="cursor-pointer"
-          >
-            <AddFriendModal />
-            <FriendSuggestionsDialog />
-          </SidebarGroupAction>
-
-          <SidebarGroupContent>
-            <DirectMessageList />
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Group Chat */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="uppercase">nhóm chat</SidebarGroupLabel>
-          <SidebarGroupAction
-            title="Tạo Nhóm"
-            className="cursor-pointer"
-          >
-            <NewGroupChatModal />
-            <NewGroupChatDialog />
-          </SidebarGroupAction>
-
-          <SidebarGroupContent>
-            <GroupChatList />
-          </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 

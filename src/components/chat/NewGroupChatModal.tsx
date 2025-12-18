@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { useChatStore } from "@/stores/useChatStore";
 
 const NewGroupChatModal = () => {
+  const [open, setOpen] = useState(false)
   const [groupName, setGroupName] = useState("");
   const [search, setSearch] = useState("");
   const { friends, getFriends } = useFriendStore();
@@ -61,6 +62,7 @@ const NewGroupChatModal = () => {
 
       setSearch("");
       setInvitedUsers([]);
+      setOpen(false)
     } catch (error) {
       console.error("Lỗi xảy ra khi handleSubmit trong NewGroupChatModal:", error);
     }
@@ -73,7 +75,7 @@ const NewGroupChatModal = () => {
   );
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="ghost"

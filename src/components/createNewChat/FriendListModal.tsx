@@ -5,7 +5,11 @@ import { Card } from "../ui/card";
 import UserAvatar from "../chat/UserAvatar";
 import { useChatStore } from "@/stores/useChatStore";
 
-const FriendListModal = () => {
+interface FriendListModalProps {
+  onClose: () => void;
+}
+
+const FriendListModal = ({ onClose }: FriendListModalProps) => {
   const { friends } = useFriendStore();
   const { createConversation, setActiveConversation, messages, fetchMessages } = useChatStore();
 
@@ -16,6 +20,7 @@ const FriendListModal = () => {
     if (!messages[id]) {
       await fetchMessages(id);
     }
+    onClose();
   };
 
   return (
