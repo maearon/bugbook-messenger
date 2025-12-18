@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Moon, Sun, Twitter } from "lucide-react";
+import { Moon, Sun, Bug } from "lucide-react";
 import { Switch } from "../ui/switch";
 import CreateNewChat from "../chat/CreateNewChat";
 import NewDirectChatDialog from "@/components/chat/NewDirectChatDialog";
@@ -29,6 +29,7 @@ import { Button } from "../ui/button";
 import { useTheme } from "next-themes";
 import { useEffect } from "react";
 import Link from "next/link";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isDark, setTheme: setZustandTheme } = useThemeStore();
@@ -64,19 +65,39 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <Link href="/">
                 <div className="flex w-full items-center px-2 justify-between">
-                  <h1 className="text-xl font-bold text-white">Moji</h1>
+                  <h1 className="text-xl font-bold text-white">Chats</h1>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 text-white hover:bg-white/20">
-                      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                    </Button>
                     {/* <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => window.open("https://ruby-rails-boilerplate.vercel.app", "_blank")}
                       className="h-8 w-8 text-white hover:bg-white/20"
                     >
-                      <Twitter className="h-4 w-4" />
+                      <Bug className="h-4 w-4" />
                     </Button> */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            window.open(
+                              "https://ruby-rails-boilerplate.vercel.app",
+                              "_blank"
+                            )
+                          }
+                          className="h-8 w-8 text-white hover:bg-white/20"
+                        >
+                          <Bug className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="center">
+                        Bugbook · 1 notification
+                      </TooltipContent>
+                    </Tooltip>
+                    <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 text-white hover:bg-white/20">
+                      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    </Button>
                   </div>
                 </div>
               </Link>

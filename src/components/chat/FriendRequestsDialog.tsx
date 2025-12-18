@@ -22,6 +22,7 @@ interface FriendRequestUI {
     id: string
     username: string
     name: string
+    displayName?: string
     email?: string;
     avatar?: string
   }
@@ -34,6 +35,7 @@ interface FriendRequestRaw {
     id: string;
     username?: string;
     name?: string;
+    displayName?: string
     email?: string;
     avatar?: string;
   };
@@ -41,6 +43,7 @@ interface FriendRequestRaw {
     id: string;
     username?: string;
     name?: string;
+    displayName?: string
     email?: string;
     avatar?: string;
   };
@@ -91,7 +94,7 @@ export function FriendRequestsDialog() {
         id: r._id,
         sender: {
           id: r.from?.id || "",
-          name: r.from?.name || "Unknown",
+          name: r.from?.name || r.from?.displayName || "Unknown",
           username: r.from?.username || "unknown",
           email: r.from?.email || "unknown",
           avatar: r.from?.avatar,
@@ -103,7 +106,7 @@ export function FriendRequestsDialog() {
         id: r._id,
         sender: {
           id: r.to?.id || "",
-          name: r.to?.name || "Unknown",
+          name: r.to?.name || r.to?.displayName || "Unknown",
           username: r.to?.username || "unknown",
           email: r.to?.email || "unknown",
           avatar: r.to?.avatar,

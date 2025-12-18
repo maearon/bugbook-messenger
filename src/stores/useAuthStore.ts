@@ -49,7 +49,7 @@ export const useAuthStore = create<AuthState>()(
           await get().fetchMe();
           useChatStore.getState().fetchConversations();
 
-          toast.success("Chào mừng bạn quay lại với Moji 🎉");
+          toast.success("Chào mừng bạn quay lại với Bookbug 🎉");
         } catch (error) {
           console.error(error);
           toast.error("Đăng nhập không thành công!");

@@ -13,7 +13,7 @@ const ChatWelcomeScreen = () => {
             <MessageCircle className="h-16 w-16 text-white" />
           </div>
           <h2 className="text-2xl font-bold mb-2 bg-gradient-chat bg-clip-text text-transparent">
-            Chào mừng bạn đến với Moji!
+            Chào mừng bạn đến với Bookbug!
           </h2>
           <p className="text-muted-foreground">
             Chọn một cuộc hội thoại để bắt đầu chat!
