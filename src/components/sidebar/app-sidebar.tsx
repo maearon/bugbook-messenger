@@ -88,7 +88,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           }
                           className="h-8 w-8 text-white hover:bg-white/20"
                         >
-                          <Bug className="h-4 w-4" />
+                          <Bug
+                            className="h-4 w-4 fill-[#16A349] text-[#16A349]"
+                            // style={{
+                            //   color: isDark ? "#21C55E" : "#16A349",
+                            // }}
+                          />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent side="top" align="center">
