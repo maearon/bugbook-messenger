@@ -40,28 +40,33 @@ const VerifyEmailPage = () => {
     const activate = async () => {
       try {
         const res = await javaService.activateAccount(token);
-        if (res?._status === 200) {
-          alert("✅ Verify email successfully.");
-          setStatus("success");
-          setTimeout(() => {
-            router.push("/login");
-          }, 3000);
-        } else if (res?._status === 400) {
-          alert("❌ Verify email failed.");
-        } else if (res?.message) {
-          // alert(`✅ ${res.message}`);
-          // setStatus("success");
-          const sure = window.confirm(`✅ ${res.message}`);
-          setStatus("success");
-          if (sure === true) {
-            setStartCountdown(true); // bật đếm ngược
-            // setTimeout(() => {
-            //   router.push("/login");
-            // }, 3000);
-          }
-        } else {
-          alert("⚠️ Something went wrong.");
-        }
+        alert("✅ Verify email successfully.");
+        setStatus("success");
+        setTimeout(() => {
+          router.push("/login");
+        }, 3000);
+        // if (res?._status === 200) {
+        //   alert("✅ Verify email successfully.");
+        //   setStatus("success");
+        //   setTimeout(() => {
+        //     router.push("/login");
+        //   }, 3000);
+        // } else if (res?._status === 400) {
+        //   alert("❌ Verify email failed.");
+        // } else if (res?.message) {
+        //   // alert(`✅ ${res.message}`);
+        //   // setStatus("success");
+        //   const sure = window.confirm(`✅ ${res.message}`);
+        //   setStatus("success");
+        //   if (sure === true) {
+        //     setStartCountdown(true); // bật đếm ngược
+        //     // setTimeout(() => {
+        //     //   router.push("/login");
+        //     // }, 3000);
+        //   }
+        // } else {
+        //   alert("⚠️ Something went wrong.");
+        // }
       } catch (error) {
         console.error("Activation Error:", error);
         alert("❌ Account activation failed. Please try again.");

@@ -98,7 +98,7 @@ const javaService = {
   // 📧 Account Activation
   async resendActivationEmail(params: ResendActivationEmailParams): Promise<WithStatus<ResendActivationEmailResponse> | undefined> {
     try {
-      const { data } = await axiosInstance.post<WithStatus<ResendActivationEmailResponse>>("/api/v1/auth/send-verification-email", params)
+      const { data } = await axiosInstance.post<WithStatus<ResendActivationEmailResponse>>("/auth/send-verification-email", params)
       return data;
     } catch (error: unknown) {
       handleNetworkError(error)
@@ -108,7 +108,7 @@ const javaService = {
 
   async activateAccount(activation_token: string): Promise<WithStatus<ResendActivationEmailResponse> | undefined> {
     try {
-      const { data } = await axiosInstance.post<WithStatus<ResendActivationEmailResponse>>(`/api/v1/auth/verify-email?token=${activation_token}`)
+      const { data } = await axiosInstance.post<WithStatus<ResendActivationEmailResponse>>(`/auth/verify-email?token=${activation_token}`)
       return data;
     } catch (error: unknown) {
       handleNetworkError(error)

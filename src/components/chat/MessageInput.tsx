@@ -59,7 +59,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
           onChange={(e) => setMessage(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Type your message..."
-          className="h-9 pr-20 bg-white text-black dark:bg-neutral-900 dark:text-white border-border/50 focus:border-primary/50 transition-smooth"
+          className="h-9 pr-8 sm:pr-20 bg-white text-black dark:bg-neutral-900 dark:text-white border-border/50 focus:border-primary/50 transition-smooth"
         />
 
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">

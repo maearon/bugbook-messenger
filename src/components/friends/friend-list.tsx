@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSocket } from "@/lib/socket/socket-context"
+import { useSocketStore } from "@/stores/useSocketStore"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -26,7 +26,7 @@ interface FriendResponse {
 export function FriendList() {
   const { data: sessionClient } = authClient.useSession();
   const userBetterAuth = sessionClient?.user ?? null;
-  const { socket } = useSocket()
+  const { socket, onlineUsers } = useSocketStore();
   const [friends, setFriends] = useState<Friend[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -46,15 +46,15 @@ export function FriendList() {
 
   const fetchFriends = async () => {
     try {
-      const res = await friendService.getFriends("");
+      const res = await friendService.getFriendsDialog("");
       let list =
         res.friends?.map((f) => ({
           id: f._id, // FIX: MAP _id → id
-          name: f.name,
-          email: f.email,
-          role: f.role,
-          avatar: f.avatar,
-          isOnline: false, // important!
+          name: f.displayName || "Unknown",
+          email: f.username || "unknown",
+          role: f.displayName || "user",
+          avatar: f.avatarUrl || "/avatar-placeholder.svg",
+          isOnline: onlineUsers.includes(f._id) ? true : false,
         })) || [];
       // remove yourself
       // list = list.filter((f) => f.id !== userMongo?._id);
@@ -91,8 +91,8 @@ export function FriendList() {
                   <AvatarFallback>{friend.name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <p className="font-medium">{friend.name}</p>
-                  <p className="text-sm text-muted-foreground">@{friend.email.split("@")[0]}</p>
+                  <p className="font-medium">{friend.name || friend?.displayName}</p>
+                  <p className="text-sm text-muted-foreground">@{friend?.username || friend.email.split("@")[0]}</p>
                 </div>
                 <Badge variant={friend.isOnline ? "default" : "secondary"}>
                   {friend.isOnline ? "Online" : "Offline"}

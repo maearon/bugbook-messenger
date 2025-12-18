@@ -1,22 +1,45 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useAuth } from "@/lib/auth/auth-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Loader2, X, RefreshCw } from "lucide-react"
+import { Loader2, RefreshCw, X } from "lucide-react"
 import { friendService } from "@/api/services/friendService"
+import { toast } from "sonner"
 
-// Raw data từ backend
+/* ===================== TYPES ===================== */
+
+interface FriendRequestUI {
+  id: string
+  sender: {
+    id: string
+    username: string
+    name: string
+    displayName?: string
+    email?: string
+    avatar?: string
+  }
+  createdAt: string
+}
+
 interface FriendRequestRaw {
   _id: string
   from: {
     id: string
     username?: string
     name?: string
+    displayName?: string
+    email?: string
     avatar?: string
   }
-  to: string
+  to: {
+    id: string
+    username?: string
+    name?: string
+    displayName?: string
+    email?: string
+    avatar?: string
+  }
   message: string
   createdAt: string
   updatedAt: string
@@ -27,32 +50,17 @@ interface FriendRequestsResponse {
   sent: FriendRequestRaw[]
 }
 
-// UI type
-interface FriendRequestWithSender {
-  id: string
-  senderId: string
-  receiverId: string
-  status: string
-  createdAt: string
-  sender: {
-    id: string
-    username: string
-    name: string
-    avatar?: string
-  }
-}
+/* ===================== PAGE ===================== */
 
-export function FriendRequests() {
-  const { accessToken } = useAuth()
-
-  const [receivedRequests, setReceivedRequests] = useState<FriendRequestWithSender[]>([])
-  const [sentRequests, setSentRequests] = useState<FriendRequestWithSender[]>([])
+export function FriendRequestsPage() {
+  const [receivedRequests, setReceivedRequests] = useState<FriendRequestUI[]>([])
+  const [sentRequests, setSentRequests] = useState<FriendRequestUI[]>([])
   const [activeTab, setActiveTab] = useState<"received" | "sent">("received")
 
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [isReloading, setIsReloading] = useState(false)
 
-  // Force loading >= 3s
+  /* ---------- FORCE LOADING >= 3s ---------- */
   const fetchWithDelay = async (fetcher: () => Promise<void>) => {
     setIsLoading(true)
     const start = Date.now()
@@ -60,7 +68,7 @@ export function FriendRequests() {
     try {
       await fetcher()
     } catch (e) {
-      console.error("fetch error:", e)
+      console.error("Fetcher error:", e)
     }
 
     const elapsed = Date.now() - start
@@ -71,181 +79,207 @@ export function FriendRequests() {
     setIsReloading(false)
   }
 
-  // ---- LOAD REQUESTS (giống dialog của bạn) ----
+  /* ---------- LOAD DATA ---------- */
   const loadRequests = async () => {
     try {
-      const res: FriendRequestsResponse = await friendService.getFriendRequests()
+      const res: FriendRequestsResponse =
+        await friendService.getFriendRequests()
 
-      const received = res.received.map((r) => ({
-        id: r._id,
-        senderId: r.from.id,
-        receiverId: r.to,
-        status: "pending",
-        createdAt: r.createdAt,
-        sender: {
-          id: r.from.id,
-          name: r.from.name || "Unknown",
-          username: r.from.username || "unknown",
-          avatar: r.from.avatar,
-        },
-      }))
+      const received = (res.received || []).map(
+        (r): FriendRequestUI => ({
+          id: r._id,
+          sender: {
+            id: r.from?.id || "",
+            name: r.from?.name || r.from?.displayName || "Unknown",
+            username: r.from?.username || "unknown",
+            email: r.from?.email || "unknown",
+            avatar: r.from?.avatar,
+          },
+          createdAt: r.createdAt,
+        })
+      )
 
-      const sent = res.sent.map((r) => ({
-        id: r._id,
-        senderId: r.from.id,
-        receiverId: r.to,
-        status: "pending",
-        createdAt: r.createdAt,
-        sender: {
-          id: r.from.id,
-          name: r.from.name || "Unknown",
-          username: r.from.username || "unknown",
-          avatar: r.from.avatar,
-        },
-      }))
+      const sent = (res.sent || []).map(
+        (r): FriendRequestUI => ({
+          id: r._id,
+          sender: {
+            id: r.to?.id || "",
+            name: r.to?.name || r.to?.displayName || "Unknown",
+            username: r.to?.username || "unknown",
+            email: r.to?.email || "unknown",
+            avatar: r.to?.avatar,
+          },
+          createdAt: r.createdAt,
+        })
+      )
 
       setReceivedRequests(received)
       setSentRequests(sent)
-    } catch (err) {
-      console.error("loadRequests error:", err)
+    } catch (e) {
+      console.error("loadRequests error:", e)
       setReceivedRequests([])
       setSentRequests([])
     }
   }
 
-  // Initial load
+  /* ---------- EFFECTS ---------- */
   useEffect(() => {
     fetchWithDelay(loadRequests)
   }, [])
 
-  // Tab switch reload
   useEffect(() => {
     fetchWithDelay(loadRequests)
   }, [activeTab])
 
-  const reload = () => {
+  const reloadData = () => {
     setIsReloading(true)
     fetchWithDelay(loadRequests)
   }
 
-  // ---- HANDLE ACCEPT / DECLINE ----
-  const handleRequest = async (id: string, action: "accept" | "reject") => {
+  /* ---------- ACCEPT / DECLINE ---------- */
+  const handleRequest = async (id: string, action: "accept" | "decline") => {
     try {
-      await friendService.responseFriendRequest(id, action === "reject" ? "decline" : "accept")
+      await friendService.responseFriendRequest(id, action)
 
-      // remove UI
+      toast.success(
+        action === "accept"
+          ? "Accepted friend request!"
+          : "Declined friend request!"
+      )
+
       setReceivedRequests((prev) => prev.filter((r) => r.id !== id))
       setSentRequests((prev) => prev.filter((r) => r.id !== id))
-    } catch (err) {
-      console.error("handleRequest error:", err)
+    } catch (e: any) {
+      console.error("handleRequest error:", e)
+      toast.error(e?.response?.data?.message || "Action failed")
     }
   }
 
   const data = activeTab === "received" ? receivedRequests : sentRequests
 
+  /* ===================== RENDER ===================== */
+
   return (
-    <div className="relative w-full rounded-2xl bg-card p-6 shadow-xl">
-      {/* Close */}
-      <button className="absolute right-4 top-4 text-gray-400 hover:text-gray-600">
+    <div className="relative mx-auto w-full h-full rounded-2xl bg-card p-0 shadow-xl">
+      {/* Close button (optional) */}
+      <button className="absolute right-4 top-4 text-muted-foreground hover:text-foreground">
         <X className="h-5 w-5" />
       </button>
 
-      {/* Title */}
-      <div className="flex items-center justify-between mb-4 mt-4">
-        <h2 className="text-xl font-bold text-gray-900">Lời mời kết bạn</h2>
+      {/* Header */}
+      <div className="p-6 pb-3">
+        <h2 className="text-lg font-semibold">Lời mời kết bạn</h2>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={reload}
-          disabled={isReloading || isLoading}
-        >
-          <RefreshCw
-            className={`h-5 w-5 text-gray-600 ${isReloading ? "animate-spin" : ""}`}
-          />
-        </Button>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Quản lý yêu cầu kết bạn đã gửi và đã nhận.
+          </p>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={reloadData}
+            disabled={isReloading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${
+                isReloading ? "animate-spin" : ""
+              }`}
+            />
+          </Button>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div className="mb-6 flex gap-2 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
-        <button
-          disabled={isLoading}
-          onClick={() => setActiveTab("received")}
-          className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === "received"
-              ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-              : "text-gray-600 hover:text-gray-900"
-          } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-        >
-          Đã nhận
-        </button>
+      {/* Body */}
+      <div className="px-6 space-y-4">
+        {/* Tabs */}
+        <div className="flex gap-2 rounded-xl bg-muted p-1">
+          <button
+            disabled={isLoading}
+            onClick={() => setActiveTab("received")}
+            className={`flex-1 rounded-lg px-4 py-2 text-sm ${
+              activeTab === "received"
+                ? "bg-background shadow"
+                : "text-muted-foreground"
+            }`}
+          >
+            Đã nhận
+          </button>
 
-        <button
-          disabled={isLoading}
-          onClick={() => setActiveTab("sent")}
-          className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === "sent"
-              ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-              : "text-gray-600 hover:text-gray-900"
-          } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-        >
-          Đã gửi
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="space-y-3">
-        {/* Loading or empty */}
-        <div className="min-h-[248px] flex items-center justify-center">
-          {isLoading ? (
-            <Loader2 className="text-purple-600 size-8 animate-spin" />
-          ) : data.length === 0 ? (
-            <p className="py-8 text-center text-gray-500">Không có lời mời kết bạn.</p>
-          ) : null}
+          <button
+            disabled={isLoading}
+            onClick={() => setActiveTab("sent")}
+            className={`flex-1 rounded-lg px-4 py-2 text-sm ${
+              activeTab === "sent"
+                ? "bg-background shadow"
+                : "text-muted-foreground"
+            }`}
+          >
+            Đã gửi
+          </button>
         </div>
 
-        {/* List */}
-        {!isLoading &&
-          data.length > 0 &&
-          data.map((request) => (
-            <div
-              key={request.id}
-              className="flex items-center gap-3 rounded-xl border border-gray-200 p-4"
-            >
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={request.sender.avatar || "/placeholder.svg"} />
-                <AvatarFallback>
-                  {request.sender.name[0]?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+        {/* Content */}
+        <div className="space-y-3 max-h-[420px] overflow-y-auto pb-6">
+          {isLoading ? (
+            <div className="min-h-[120px] flex items-center justify-center">
+              <Loader2 className="animate-spin text-purple-600 h-6 w-6" />
+            </div>
+          ) : data.length === 0 ? (
+            <div className="min-h-[120px] flex items-center justify-center">
+              <p className="text-muted-foreground">
+                Không có lời mời kết bạn.
+              </p>
+            </div>
+          ) : (
+            data.map((r) => (
+              <div
+                key={r.id}
+                className="flex items-center gap-3 border p-4 rounded-xl"
+              >
+                <Avatar className="h-12 w-12">
+                  <AvatarImage
+                    src={r.sender.avatar || "/avatar-placeholder.png"}
+                  />
+                  <AvatarFallback>
+                    {r.sender.name[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
 
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900">{request.sender.name}</p>
-                <p className="text-sm text-gray-500">@{request.sender.username}</p>
-              </div>
+                <div className="flex-1">
+                  <p className="font-semibold">{r.sender.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {r.sender.email}
+                  </p>
+                </div>
 
-              <div className="flex gap-2">
-                {activeTab === "received" && (
+                <div className="flex gap-2">
+                  {activeTab === "received" && (
+                    <Button
+                      size="sm"
+                      className="border-2 border-purple-600 text-purple-600 bg-background"
+                      onClick={() =>
+                        handleRequest(r.id, "accept")
+                      }
+                    >
+                      Chấp nhận
+                    </Button>
+                  )}
+
                   <Button
                     size="sm"
-                    onClick={() => handleRequest(request.id, "accept")}
-                    className="rounded-full border-2 border-purple-600 bg-white px-4 text-purple-600 hover:bg-purple-50"
+                    variant="destructive"
+                    onClick={() =>
+                      handleRequest(r.id, "decline")
+                    }
                   >
-                    Chấp nhận
+                    Từ chối
                   </Button>
-                )}
-
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => handleRequest(request.id, "reject")}
-                  className="rounded-full bg-red-600 px-4 hover:bg-red-700"
-                >
-                  Từ chối
-                </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
+        </div>
       </div>
     </div>
   )

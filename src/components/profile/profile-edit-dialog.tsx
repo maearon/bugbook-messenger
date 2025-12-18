@@ -17,10 +17,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Pencil } from "lucide-react"
-import { useAuth } from "@/lib/auth/auth-context"
+import { useAuthStore } from "@/stores/useAuthStore"
 
 export function ProfileEditDialog() {
-  const { user, accessToken } = useAuth()
+  const { user } = useAuthStore();
   const [open, setOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: user?.name || "",

@@ -1,17 +1,17 @@
-import { getServerSession } from "@/lib/get-session";
-import type { Metadata } from "next";
+"use client";
+
+import { useAuthStore } from "@/stores/useAuthStore";
+// import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ResendVerificationButton } from "./resend-verification-button";
+// export const metadata: Metadata = {
+//   title: "Verify Email",
+// };
 
-export const metadata: Metadata = {
-  title: "Verify Email",
-};
+export default function SendVerificationEmailPage() {
+  const { user } = useAuthStore();
 
-export default async function SendVerificationEmailPage() {
-  const session = await getServerSession();
-  const user = session?.user;
-
-  if (!user) redirect("/login");
+  if (!user) redirect("/signin");
 
   return (
     <main className="flex flex-1 items-center justify-center px-4 text-center">
