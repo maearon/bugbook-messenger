@@ -28,8 +28,8 @@ const TypingIndicatorMessage = ({
         avatarUrl={avatarUrl ?? undefined}
       />
 
-      {/* Bubble */}
-      <div className="rounded-2xl bg-muted px-4 py-2 animate-pulse text-sm text-muted-foreground shadow-sm">
+      {/* Bubble  animate-pulse */}
+      <div className="rounded-2xl bg-muted px-4 py-2 text-sm text-muted-foreground shadow-sm">
         <TypingDotsStatic />
       </div>
     </div>
