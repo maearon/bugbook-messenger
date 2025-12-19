@@ -18,6 +18,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
   const { activeConversationId, sendDirectMessage, sendGroupMessage } = useChatStore();
   const [message, setMessage] = useState("");
   const prevConvoIdRef = useRef<string | null>(null);
+  const soundTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // 🔴 STOP typing ở conversation cũ
@@ -50,15 +51,24 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
       if (selectedConvo.type === "direct") {
         const participants = selectedConvo.participants;
         const otherUser = participants.filter((p) => p._id !== user._id)[0];
-        playSendSound(); // ✅ PLAY SOUND CHO DIRECT MESSAGE
+        // 🔊 delay sound ~120ms (cảm giác "đã gửi")
+        soundTimeoutRef.current = setTimeout(() => {
+          playSendSound();
+        }, 120);
         await sendDirectMessage(otherUser._id, currValue);
-        playSendSound();
       } else {
-        playSendSound(); // ✅ PLAY SOUND CHO GROUP MESSAGE
+        // 🔊 delay sound ~120ms (cảm giác "đã gửi")
+        soundTimeoutRef.current = setTimeout(() => {
+          playSendSound();
+        }, 120);
         await sendGroupMessage(selectedConvo._id, currValue);
-        playSendSound();
       }
     } catch (error) {
+      // ❌ nếu fail thì hủy sound (UX chuẩn)
+      if (soundTimeoutRef.current) {
+        clearTimeout(soundTimeoutRef.current);
+      }
+
       console.error(error);
       toast.error("Lỗi xảy ra khi gửi tin nhắn. Bạn hãy thử lại!");
     }
