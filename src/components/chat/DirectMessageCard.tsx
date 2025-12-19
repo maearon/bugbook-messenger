@@ -34,10 +34,7 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
   // const lastMessage = parseEmoji(convo.lastMessage?.content ?? "");
   const rawLastMessage = convo.lastMessage;
 
-  const senderId =
-    typeof rawLastMessage?.sender._id === "string"
-      ? rawLastMessage?.sender._id
-      : rawLastMessage?.sender._id;
+  const senderId = rawLastMessage?.sender?._id;
 
   const lastMessageContent = parseEmoji(rawLastMessage?.content ?? "");
 
