@@ -1,3 +1,5 @@
+"use client";
+
 import type { Conversation } from "@/types/chat";
 import ChatCard from "./ChatCard";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -8,7 +10,6 @@ import StatusBadge from "./StatusBadge";
 import UnreadCountBadge from "./UnreadCountBadge";
 import { useSocketStore } from "@/stores/useSocketStore";
 import { parseEmoji } from "@/lib/emoji";
-import { LoadingDots } from "../products/enhanced-product-form";
 import TypingDots from "./TypingDots";
 
 const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
@@ -19,19 +20,18 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
 
   if (!user) return null;
 
+  // user còn lại trong direct chat
   const otherUser = convo.participants.find((p) => p._id !== user._id);
   if (!otherUser) return null;
 
-  const unreadCount = convo.unreadCounts[user._id];
-  // const lastMessage = parseEmoji(convo.lastMessage?.content ?? "");
-  const isOwnLastMessage =
-  convo.lastMessage?.sender?._id === user._id
+  const unreadCount = convo.unreadCounts?.[user._id] ?? 0;
 
-  const lastMessage = parseEmoji(
-    isOwnLastMessage
-      ? `Bạn: ${convo.lastMessage?.content ?? ""}`
-      : convo.lastMessage?.content ?? ""
-  );
+  /**
+   * ✅ CÁCH LÀM ĐƠN GIẢN – KHÔNG ĐỤNG sender._id
+   * - Chỉ hiển thị content
+   * - Không suy đoán ai gửi
+   */
+  const lastMessage = parseEmoji(convo.lastMessage?.content ?? "");
 
   const handleSelectConversation = async (id: string) => {
     setActiveConversation(id);
@@ -40,6 +40,7 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
     }
   };
 
+  // typing
   const typingUserIds = typingUsers[convo._id] || [];
   const isTyping = typingUserIds.length > 0;
 
@@ -67,7 +68,9 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
               onlineUsers.includes(otherUser?._id ?? "") ? "online" : "offline"
             }
           />
-          {unreadCount > 0 && <UnreadCountBadge unreadCount={unreadCount} />}
+          {unreadCount > 0 && (
+            <UnreadCountBadge unreadCount={unreadCount} />
+          )}
         </>
       }
       // subtitle={
