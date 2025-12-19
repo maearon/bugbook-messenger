@@ -31,7 +31,20 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
    * - Chỉ hiển thị content
    * - Không suy đoán ai gửi
    */
-  const lastMessage = parseEmoji(convo.lastMessage?.content ?? "");
+  // const lastMessage = parseEmoji(convo.lastMessage?.content ?? "");
+  const rawLastMessage = convo.lastMessage;
+
+  const senderId =
+    typeof rawLastMessage?.sender._id === "string"
+      ? rawLastMessage?.sender._id
+      : rawLastMessage?.sender._id;
+
+  const lastMessageContent = parseEmoji(rawLastMessage?.content ?? "");
+
+  const lastMessageText =
+    senderId === user._id
+      ? `Bạn: ${lastMessageContent}`
+      : lastMessageContent;
 
   const handleSelectConversation = async (id: string) => {
     setActiveConversation(id);
@@ -94,7 +107,7 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
               : "text-muted-foreground"
           )}
         >
-          {isTyping ? <TypingDots /> : lastMessage}
+          {isTyping ? <TypingDots /> : lastMessageText}
         </p>
       }
     />
