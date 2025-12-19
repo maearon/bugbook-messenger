@@ -73,6 +73,7 @@ export interface ChatState {
 export interface SocketState {
   socket: Socket | null;
   onlineUsers: string[];
+  typingUsers: Record<string, string[]>; // convoId → userIds
   connectSocket: () => void;
   disconnectSocket: () => void;
 }

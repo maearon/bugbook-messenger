@@ -10,8 +10,10 @@ import EmojiPicker from "./EmojiPicker";
 import { useChatStore } from "@/stores/useChatStore";
 import { toast } from "sonner";
 import { playSendSound } from "@/lib/sound";
+import { useSocketStore } from "@/stores/useSocketStore";
 
 const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
+  const { socket } = useSocketStore();
   const { user } = useAuthStore();
   const { sendDirectMessage, sendGroupMessage } = useChatStore();
   const [message, setMessage] = useState("");
@@ -22,6 +24,10 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     if (!message.trim()) return;
     const currValue = message;
     setMessage("");
+    socket?.emit("typing", {
+      conversationId: selectedConvo._id,
+      isTyping: false,
+    });
 
     try {
       if (selectedConvo.type === "direct") {
@@ -58,7 +64,14 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
       <div className="flex-1 relative">
         <Input
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+
+            socket?.emit("typing", {
+              conversationId: selectedConvo._id,
+              isTyping: e.target.value.length > 0,
+            });
+          }}
           onKeyPress={handleKeyPress}
           // placeholder="Type your message..."
           placeholder="Soạn tin nhắn..."

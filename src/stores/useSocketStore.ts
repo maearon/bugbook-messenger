@@ -9,6 +9,7 @@ import { playReceiveSound } from "@/lib/sound";
 export const useSocketStore = create<SocketState>((set, get) => ({
   socket: null,
   onlineUsers: [],
+  typingUsers: {},
 
   connectSocket: () => {
     const accessToken = useAuthStore.getState().accessToken;
@@ -24,6 +25,21 @@ export const useSocketStore = create<SocketState>((set, get) => ({
 
     socket.on("online-users", (userIds: string[]) => {
       set({ onlineUsers: userIds });
+    });
+
+    socket.on("user-typing", ({ conversationId, userId, isTyping }) => {
+      set((state) => {
+        const current = state.typingUsers[conversationId] || [];
+
+        return {
+          typingUsers: {
+            ...state.typingUsers,
+            [conversationId]: isTyping
+              ? [...new Set([...current, userId])]
+              : current.filter((id) => id !== userId),
+          },
+        };
+      });
     });
 
     socket.on("new-message", ({ message, conversation, unreadCounts }) => {

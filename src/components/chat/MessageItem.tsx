@@ -75,7 +75,7 @@ const MessageItem = ({
               message.isOwn ? "chat-bubble-sent border-0" : "chat-bubble-received"
             )}
           >
-            <p className="text-sm leading-relaxed break-words">{parseEmoji(message.content)}</p>
+            <p className="text-sm leading-relaxed break-words">{parseEmoji(message.content || "")}</p>
           </Card>
 
           {/* seen/ delivered */}

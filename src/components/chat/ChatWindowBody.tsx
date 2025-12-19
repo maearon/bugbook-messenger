@@ -5,8 +5,14 @@ import ChatWelcomeScreen from "./ChatWelcomeScreen";
 import MessageItem from "./MessageItem";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useSocketStore } from "@/stores/useSocketStore";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { LoadingDots } from "../products/enhanced-product-form";
+import TypingIndicatorMessage from "./TypingIndicatorMessage";
 
 const ChatWindowBody = () => {
+  const { user } = useAuthStore();
+  const { typingUsers } = useSocketStore(); 
   const {
     activeConversationId,
     conversations,
@@ -26,6 +32,11 @@ const ChatWindowBody = () => {
   // ref
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    console.log("typingUsers:", typingUsers);
+    console.log("activeConversationId:", activeConversationId);
+  }, [typingUsers, activeConversationId]);
 
   // seen status
   useEffect(() => {
@@ -87,6 +98,28 @@ const ChatWindowBody = () => {
     }
   }, [messages.length]);
 
+  // const typingUserIds =
+  //   typingUsers[activeConversationId ?? ""] ?? [];
+
+  // const isTyping = typingUserIds.length > 0;
+
+  // const typingUserIds =
+  //   (typingUsers[activeConversationId ?? ""] ?? []).filter(
+  //     (id) => id !== user?._id
+  //   );
+
+  // const isTyping = typingUserIds.length > 0;
+
+  // const typingUserIds = typingUsers[convo._id] || [];
+  // const isTyping = typingUserIds.length > 0;
+
+  const typingUserIds =
+    (typingUsers[activeConversationId ?? ""] ?? []).filter(
+      (id) => id !== user?._id // không hiển thị mình đang gõ
+    );
+
+  const isTyping = typingUserIds.length > 0;
+
   if (!selectedConvo) {
     return <ChatWelcomeScreen />;
   }
@@ -108,30 +141,59 @@ const ChatWindowBody = () => {
         className="flex flex-col-reverse overflow-y-auto overflow-x-hidden beautiful-scrollbar"
       >
         <div ref={messagesEndRef}></div>
+        {/* ✅ typing indicator đặt TRƯỚC */}
+  {/* {isTyping && (
+    <div className="px-2 py-1 text-sm italic text-muted-foreground border-4 border-border/50 rounded-md mb-2">
+      <LoadingDots />
+    </div>
+  )} */}
         <InfiniteScroll
-          dataLength={messages.length}
-          next={fetchMoreMessages}
-          hasMore={hasMore}
-          scrollableTarget="scrollableDiv"
-          loader={<p>Đang tải...</p>}
-          inverse={true}
-          style={{
-            display: "flex",
-            flexDirection: "column-reverse",
-            overflow: "visible",
-          }}
-        >
-          {reversedMessages.map((message, index) => (
-            <MessageItem
-              key={message._id ?? index}
-              message={message}
-              index={index}
-              messages={reversedMessages}
-              selectedConvo={selectedConvo}
-              lastMessageStatus={lastMessageStatus}
-            />
-          ))}
-        </InfiniteScroll>
+        loader={<p>Đang tải...</p>}
+  dataLength={messages.length}
+  next={fetchMoreMessages}
+  hasMore={hasMore}
+  scrollableTarget="scrollableDiv"
+  inverse
+  style={{
+    display: "flex",
+    flexDirection: "column-reverse",
+    overflow: "visible",
+  }}
+>
+  {/* ✅ Typing indicator như 1 message */}
+  {isTyping && (
+    <TypingIndicatorMessage
+      userName={
+        selectedConvo.participants.find(
+          (p) => p._id === typingUserIds[0]
+        )?.displayName
+      }
+      avatarUrl={
+        selectedConvo.participants.find(
+          (p) => p._id === typingUserIds[0]
+        )?.avatarUrl || undefined
+      }
+    />
+  )}
+
+  {reversedMessages.map((message, index) => (
+    <MessageItem
+      key={message._id ?? index}
+      message={message}
+      index={index}
+      messages={reversedMessages}
+      selectedConvo={selectedConvo}
+      lastMessageStatus={lastMessageStatus}
+    />
+  ))}
+</InfiniteScroll>
+
+        {/* ✅ typing indicator PHẢI ở đây */}
+        {/* {isTyping && (
+          <div className="px-2 py-1 text-sm italic text-muted-foreground">
+            <LoadingDots />
+          </div>
+        )} */}
       </div>
     </div>
   );

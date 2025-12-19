@@ -4,8 +4,12 @@ import type { Conversation } from "@/types/chat";
 import ChatCard from "./ChatCard";
 import UnreadCountBadge from "./UnreadCountBadge";
 import GroupChatAvatar from "./GroupChatAvatar";
+import { useSocketStore } from "@/stores/useSocketStore";
+import { LoadingDots } from "../products/enhanced-product-form";
+import TypingDots from "./TypingDots";
 
 const GroupChatCard = ({ convo }: { convo: Conversation }) => {
+  const { typingUsers } = useSocketStore();
   const { user } = useAuthStore();
   const { activeConversationId, setActiveConversation, messages, fetchMessages } =
     useChatStore();
@@ -20,6 +24,8 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
       await fetchMessages();
     }
   };
+
+  const isTyping = (typingUsers[convo._id]?.length ?? 0) > 0;
 
   return (
     <ChatCard
@@ -42,9 +48,16 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
           />
         </>
       }
+      // subtitle={
+      //   <p className="text-sm truncate text-muted-foreground">
+      //     {convo.participants.length} thành viên
+      //   </p>
+      // }
       subtitle={
         <p className="text-sm truncate text-muted-foreground">
-          {convo.participants.length} thành viên
+          {isTyping
+            ? <TypingDots />
+            : `${convo.participants.length} thành viên`}
         </p>
       }
     />

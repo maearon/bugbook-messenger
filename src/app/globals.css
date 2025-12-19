@@ -427,3 +427,57 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* src\components\chat\TypingDots.tsx */
+
+@keyframes typing-wave {
+  0% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+}
+
+.typing-dot {
+  width: 8px;
+height: 8px;
+  border-radius: 9999px;
+  background-color: currentColor;
+  animation: typing-wave 1.4s infinite ease-in-out;
+}
+
+.typing-dot.delay-0 {
+  animation-delay: 0s;
+}
+
+.typing-dot.delay-150 {
+  animation-delay: 0.15s;
+}
+
+.typing-dot.delay-300 {
+  animation-delay: 0.3s;
+}
+
+/* src\components\chat\TypingDots.tsx */
+
+
+.typing-dot-static {
+  width: 8px;
+height: 8px;
+  border-radius: 9999px;
+  background-color: currentColor;
+  opacity: 0.7;
+}
+
+/* src\components\chat\TypingDotsStatic.tsx */

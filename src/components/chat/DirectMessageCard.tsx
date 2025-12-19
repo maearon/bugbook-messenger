@@ -8,12 +8,14 @@ import StatusBadge from "./StatusBadge";
 import UnreadCountBadge from "./UnreadCountBadge";
 import { useSocketStore } from "@/stores/useSocketStore";
 import { parseEmoji } from "@/lib/emoji";
+import { LoadingDots } from "../products/enhanced-product-form";
+import TypingDots from "./TypingDots";
 
 const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
   const { user } = useAuthStore();
   const { activeConversationId, setActiveConversation, messages, fetchMessages } =
     useChatStore();
-  const { onlineUsers } = useSocketStore();
+  const { onlineUsers, typingUsers } = useSocketStore();
 
   if (!user) return null;
 
@@ -29,6 +31,9 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
       await fetchMessages();
     }
   };
+
+  const typingUserIds = typingUsers[convo._id] || [];
+  const isTyping = typingUserIds.length > 0;
 
   return (
     <ChatCard
@@ -57,14 +62,28 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
           {unreadCount > 0 && <UnreadCountBadge unreadCount={unreadCount} />}
         </>
       }
+      // subtitle={
+      //   <p
+      //     className={cn(
+      //       "text-sm truncate",
+      //       unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground"
+      //     )}
+      //   >
+      //     {lastMessage}
+      //   </p>
+      // }
       subtitle={
         <p
           className={cn(
             "text-sm truncate",
-            unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground"
+            isTyping
+              ? "text-primary"
+              : unreadCount > 0
+              ? "font-medium text-foreground"
+              : "text-muted-foreground"
           )}
         >
-          {lastMessage}
+          {isTyping ? <TypingDots /> : lastMessage}
         </p>
       }
     />
