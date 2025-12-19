@@ -51,16 +51,16 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
       if (selectedConvo.type === "direct") {
         const participants = selectedConvo.participants;
         const otherUser = participants.filter((p) => p._id !== user._id)[0];
-        // 🔊 delay sound ~900ms (cảm giác "đã gửi")
+        // 🔊 delay sound ~1000ms (cảm giác "đã gửi")
         soundTimeoutRef.current = setTimeout(() => {
           playSendSound();
-        }, 900);
+        }, 1000);
         await sendDirectMessage(otherUser._id, currValue);
       } else {
-        // 🔊 delay sound ~900ms (cảm giác "đã gửi")
+        // 🔊 delay sound ~1000ms (cảm giác "đã gửi")
         soundTimeoutRef.current = setTimeout(() => {
           playSendSound();
-        }, 900);
+        }, 1000);
         await sendGroupMessage(selectedConvo._id, currValue);
       }
     } catch (error) {
