@@ -43,7 +43,7 @@ const VerifyEmailPage = () => {
         alert("✅ Verify email successfully.");
         setStatus("success");
         setTimeout(() => {
-          router.push("/login");
+          router.push("/signin");
         }, 3000);
         // if (res?._status === 200) {
         //   alert("✅ Verify email successfully.");
@@ -90,7 +90,7 @@ const VerifyEmailPage = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4">
       <div className="max-w-md text-center bg-background p-8 rounded-2xl shadow-xl space-y-4 border">
         {status === "loading" && (
           <>
