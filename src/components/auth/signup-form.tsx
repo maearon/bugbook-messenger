@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useTranslations } from "@/hooks/useTranslations";
 import Link from "next/link";
 import Image from "next/image";
+import { copyToClipboard } from "@/lib/clipboard";
 
 const signUpSchema = z.object({
   firstname: z.string().min(1, "Tên bắt buộc phải có"),
@@ -47,17 +48,22 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 
       await signUp(username, password, email, firstname, lastname);
 
-      // ✅ CHỈ redirect khi signup thành công
-      router.push("/signin");
+      const sure = window.confirm("Bạn đã đăng ký thành công bây giờ bán có muốn di chuyển sang trang Đăng Nhập không?")
+      if (sure === true) {
+        // 👉 chọn 1 trong 2
+        await copyToClipboard(username);
+        // await copyToClipboard(email);
+        router.push("/signin");
+      }
     } catch (err: any) {
-      /**
-       * Giả sử backend trả:
-       * { message: "username đã tồn tại" }
-       * hoặc bạn throw new Error(message) trong store
-       */
+      const message =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Đăng ký thất bại";
+
       setError("root", {
         type: "server",
-        message: err?.message || "Đăng ký thất bại",
+        message,
       });
     }
   };
@@ -179,7 +185,13 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
           </form>
 
           <div className="bg-muted relative hidden md:block">
-            <Image src="/placeholder.png" alt="Image" fill priority />
+            <Image
+              src="/placeholder.png"
+              alt="Image"
+              className="object-contain"
+              fill
+              priority
+            />
           </div>
         </CardContent>
       </Card>

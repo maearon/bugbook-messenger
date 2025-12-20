@@ -34,16 +34,17 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           console.error(error);
           toast.error("Đăng ký không thành công");
+          throw error;
         } finally {
           set({ loading: false });
         }
       },
-      signIn: async (username, password) => {
+      signIn: async (identifier, password) => {
         try {
           get().clearState();
           set({ loading: true });
 
-          const { accessToken } = await authService.signIn(username, password);
+          const { accessToken } = await authService.signIn(identifier, password);
           get().setAccessToken(accessToken);
 
           await get().fetchMe();
@@ -53,6 +54,7 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           console.error(error);
           toast.error("Đăng nhập không thành công!");
+          throw error;
         } finally {
           set({ loading: false });
         }

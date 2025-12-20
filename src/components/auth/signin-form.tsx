@@ -17,7 +17,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 const signInSchema = z.object({
-  username: z.string().min(3, "Tên đăng nhập phải có ít nhất 3 ký tự"),
+  identifier: z.string().min(3, "Identifier phải có ít nhất 3 ký tự"),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
 });
 
@@ -40,21 +40,20 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
 
   const onSubmit = async (data: SignInFormValues) => {
     try {
-      const { username, password } = data;
+      const { identifier, password } = data;
 
-      await signIn(username, password);
+      await signIn(identifier, password);
 
-      // ✅ CHỈ redirect khi login thành công
       router.push("/");
     } catch (err: any) {
-      /**
-       * Backend thường trả:
-       * { message: "Sai tên đăng nhập hoặc mật khẩu" }
-       * hoặc store throw new Error(message)
-       */
+      const message =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Đăng nhập thất bại";
+
       setError("root", {
         type: "server",
-        message: err?.message || "Đăng nhập thất bại",
+        message,
       });
     }
   };
@@ -94,17 +93,17 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
                 </p>
               )}
 
-              {/* username */}
+              {/* identifier */}
               <div className="flex flex-col gap-3">
-                <Label htmlFor="username">Tên đăng nhập</Label>
+                <Label htmlFor="identifier">Tên đăng nhập / Email / Phone / ID</Label>
                 <Input
-                  id="username"
-                  placeholder="moji"
-                  {...register("username")}
+                  id="identifier"
+                  placeholder="bugbook"
+                  {...register("identifier")}
                 />
-                {errors.username && (
+                {errors.identifier && (
                   <p className="text-destructive text-sm">
-                    {errors.username.message}
+                    {errors.identifier.message}
                   </p>
                 )}
               </div>
