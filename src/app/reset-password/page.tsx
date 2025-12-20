@@ -81,7 +81,7 @@ const Edit = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-50 dark:bg-gray-900">
       <div className="w-full max-w-md bg-background shadow-md rounded-2xl p-8">
         <h2 className="text-2xl font-bold text-center mb-6">
           Reset your password

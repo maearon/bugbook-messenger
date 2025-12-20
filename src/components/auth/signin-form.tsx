@@ -148,6 +148,12 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
               </Button>
 
               <div className="text-center text-sm">
+                Quên mật khẩu?{" "}
+                <Link href="/forgot-password" className="underline">
+                  Đặt lại mật khẩu
+                </Link>
+              </div>
+              <div className="text-center text-sm">
                 Chưa có tài khoản?{" "}
                 <Link href="/signup" className="underline">
                   Đăng ký
