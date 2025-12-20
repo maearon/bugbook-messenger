@@ -8,7 +8,8 @@ interface SendEmailValues {
 
 function createTransporter() {
   return nodemailer.createTransport({
-    service: "gmail",
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
     auth: {
       user: process.env.SMTP_USERNAME!,
       pass: process.env.SMTP_PASSWORD!,

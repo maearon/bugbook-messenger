@@ -3,8 +3,8 @@ import axios from "axios";
 
 const BASE_URL =
   process.env.NODE_ENV === "development"
-    ? "http://localhost:5001/api"
-    : "https://node-boilerplate-pww8.onrender.com/api"
+    ? "http://localhost:5005/api/v1"
+    : "https://bugbook-messenger.vercel.app/api/v1"
 
 const api = axios.create({
   baseURL: BASE_URL,
