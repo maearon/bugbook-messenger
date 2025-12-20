@@ -176,6 +176,12 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
               </Button>
 
               <div className="text-center text-sm">
+                Chưa xác thực tài khoản?{" "}
+                <Link href="/signin" className="underline">
+                  Nhận lại email xác thực
+                </Link>
+              </div>
+              <div className="text-center text-sm">
                 Đã có tài khoản?{" "}
                 <Link href="/signin" className="underline">
                   Đăng nhập
