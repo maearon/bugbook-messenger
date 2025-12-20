@@ -32,33 +32,35 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
     }
   };
 
+  /* =======================
+   * Last message normalize
+   * ======================= */
   const rawLastMessage = convo.lastMessage;
-
-  const senderId = rawLastMessage?.sender?._id;
 
   const lastMessageContent = parseEmoji(rawLastMessage?.content ?? "");
 
-  // ✅ FIX: dùng senderId thay vì sender
-  const lastMessage = convo.lastMessage;
-  const senderIdForOther =
-    typeof lastMessage?.senderId === "string"
-      ? lastMessage.senderId
-      : lastMessage?.senderId?._id;
+  // Ưu tiên sender._id → fallback senderId
+  const senderId =
+    rawLastMessage?.sender?._id ??
+    (typeof (rawLastMessage as any)?.senderId === "string"
+      ? (rawLastMessage as any).senderId
+      : (rawLastMessage as any)?.senderId?._id);
 
-  const lastMessageText =
-    senderId === user._id
-      // ? `Bạn: ${lastMessageContent}`
-      ? `${lastMessageContent}`
-      : lastMessageContent;
+  const sender = convo.participants.find((p) => p._id === senderId);
 
-  const sender = convo.participants.find(
-    (p) => p._id === senderIdForOther
-  );
+  const isOwnMessage = senderId === user._id;
 
+  const prefix = isOwnMessage
+    ? "Bạn: "
+    : sender?.displayName
+    ? `${sender.displayName}: `
+    : "Bạn: ";
+
+  /* =======================
+   * Typing state
+   * ======================= */
   const typingUserIds =
-    (typingUsers[convo._id] ?? []).filter(
-      (id) => id !== user._id
-    );
+    (typingUsers[convo._id] ?? []).filter((id) => id !== user._id);
 
   const isTyping = typingUserIds.length > 0;
 
@@ -94,13 +96,12 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
         <p className="text-sm truncate text-muted-foreground">
           {isTyping ? (
             <TypingDots />
-          ) : (lastMessageText && lastMessage && (senderId || senderIdForOther)) ? (
+          ) : rawLastMessage ? (
             <>
-              <span className="font-medium">
-                {sender?._id === user._id ? "Bạn: " : `${sender?.displayName}: ` || ""}
-              </span>
-              {/* {" "} */}
-              {lastMessageText} ({convo.participants.length}) thành viên
+              <span 
+                // className="font-medium"
+              >{prefix}</span>
+              {lastMessageContent} ({convo.participants.length}) thành viên
             </>
           ) : (
             `${convo.participants.length} thành viên`
