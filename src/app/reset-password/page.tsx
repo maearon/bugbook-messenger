@@ -115,7 +115,7 @@ const Edit = () => {
               Confirm Password
             </label>
             <Link
-              href="/login"
+              href="/signin"
               className="text-sm text-purple-600 hover:text-purple-700"
             >
               Quay lại đăng nhập

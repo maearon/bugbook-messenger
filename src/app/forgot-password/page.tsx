@@ -45,7 +45,7 @@ const ForgotPassword: NextPage = () => {
             >
               Email address
             </label>
-            <Link href="/login" className="text-sm text-purple-600 hover:text-purple-700">
+            <Link href="/signin" className="text-sm text-purple-600 hover:text-purple-700">
               Quay lại đăng nhập
             </Link>
             <input
