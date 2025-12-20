@@ -52,7 +52,7 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
       : lastMessageContent;
 
   const sender = convo.participants.find(
-    (p) => p._id === senderId
+    (p) => p._id === senderIdForOther
   );
 
   const typingUserIds =
@@ -97,7 +97,7 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
           ) : (lastMessageText && lastMessage && (senderId || senderIdForOther)) ? (
             <>
               <span className="font-medium">
-                {sender?._id === user._id ? "Bạn: " : `${senderIdForOther?.displayName}: ` || ""}
+                {sender?._id === user._id ? "Bạn: " : `${sender?.displayName}: ` || ""}
               </span>
               {/* {" "} */}
               {lastMessageText} ({convo.participants.length}) thành viên
