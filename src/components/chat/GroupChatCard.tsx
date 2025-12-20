@@ -8,6 +8,7 @@ import UnreadCountBadge from "./UnreadCountBadge";
 import GroupChatAvatar from "./GroupChatAvatar";
 import { useSocketStore } from "@/stores/useSocketStore";
 import TypingDots from "./TypingDots";
+import { parseEmoji } from "@/lib/emoji";
 
 const GroupChatCard = ({ convo }: { convo: Conversation }) => {
   const { typingUsers } = useSocketStore();
@@ -31,13 +32,22 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
     }
   };
 
-  const lastMessage = convo.lastMessage;
+  const rawLastMessage = convo.lastMessage;
+
+  const senderId = rawLastMessage?.sender?._id;
+
+  const lastMessageContent = parseEmoji(rawLastMessage?.content ?? "");
 
   // ✅ FIX: dùng senderId thay vì sender
-  const senderId =
-    typeof lastMessage?.senderId === "string"
-      ? lastMessage.senderId
-      : lastMessage?.senderId?._id;
+  // const senderId =
+  //   typeof lastMessage?.senderId === "string"
+  //     ? lastMessage.senderId
+  //     : lastMessage?.senderId?._id;
+
+  const lastMessageText =
+    senderId === user._id
+      ? `Bạn: ${lastMessageContent}`
+      : lastMessageContent;
 
   const sender = convo.participants.find(
     (p) => p._id === senderId
@@ -55,8 +65,8 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
       convoId={convo._id}
       name={name}
       timestamp={
-        lastMessage?.createdAt
-          ? new Date(lastMessage.createdAt)
+        rawLastMessage?.createdAt
+          ? new Date(rawLastMessage.createdAt)
           : undefined
       }
       isActive={activeConversationId === convo._id}
@@ -82,12 +92,13 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
         <p className="text-sm truncate text-muted-foreground">
           {isTyping ? (
             <TypingDots />
-          ) : lastMessage ? (
+          ) : lastMessageText ? (
             <>
               <span className="font-medium">
-                {sender?._id === user._id ? "Bạn" : sender?.displayName || "Ai đó"}:
-              </span>{" "}
-              {lastMessage.content} ({convo.participants.length}) thành viên
+                {sender?._id === user._id ? "Bạn: " : `${sender?.displayName}: ` || ""}
+              </span>
+              {/* {" "} */}
+              {lastMessageText} ({convo.participants.length}) thành viên
             </>
           ) : (
             `${convo.participants.length} thành viên`
