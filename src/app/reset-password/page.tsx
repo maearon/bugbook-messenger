@@ -4,9 +4,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import javaService from "@/api/services/javaService";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useTranslations } from "@/hooks/useTranslations";
 
 const Edit = () => {
+  const t = useTranslations("auth");
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -14,6 +16,10 @@ const Edit = () => {
   const [state, setState] = useState({
     password: "",
     password_confirmation: "",
+  });
+  const [showPassword, setShowPassword] = useState({
+    password: false,
+    password_confirmation: false,
   });
   const searchParams = useSearchParams();
 
@@ -95,8 +101,9 @@ const Edit = () => {
             >
               New Password
             </label>
+            <div className="relative">
             <input
-              type="password"
+              type={showPassword.password ? "text" : "password"}
               name="user[password]"
               id="user_password"
               value={state.password}
@@ -105,6 +112,27 @@ const Edit = () => {
               className="w-full px-4 py-2 border rounded-xl focus:outline-hidden focus:ring-2 focus:ring-black"
               placeholder="Enter new password"
             />
+            <button
+              type="button"
+              onClick={() =>
+                setShowPassword((prev) => ({
+                  ...prev,
+                  password: !prev.password,
+                }))
+              }
+              className="absolute right-3 top-4 text-muted-foreground text-xs"
+            >
+              {showPassword.password ? (
+                <>
+                  <EyeOff className="inline-block w-4 h-4 mr-1" /> {t?.hide || "HIDE"}
+                </>
+              ) : (
+                <>
+                  <Eye className="inline-block w-4 h-4 mr-1" /> {t?.show || "SHOW"}
+                </>
+              )}
+            </button>
+            </div>
           </div>
 
           <div>
@@ -120,8 +148,9 @@ const Edit = () => {
             >
               Quay lại đăng nhập
             </Link>
+            <div className="relative">
             <input
-              type="password"
+              type={showPassword.password_confirmation ? "text" : "password"}
               name="user[password_confirmation]"
               id="user_password_confirmation"
               value={state.password_confirmation}
@@ -130,6 +159,27 @@ const Edit = () => {
               className="w-full px-4 py-2 border rounded-xl focus:outline-hidden focus:ring-2 focus:ring-black"
               placeholder="Confirm password"
             />
+            <button
+              type="button"
+              onClick={() =>
+                setShowPassword((prev) => ({
+                  ...prev,
+                  password_confirmation: !prev.password_confirmation,
+                }))
+              }
+              className="absolute right-3 top-4 text-muted-foreground text-xs"
+            >
+              {showPassword.password_confirmation ? (
+                <>
+                  <EyeOff className="inline-block w-4 h-4 mr-1" /> {t?.hide || "HIDE"}
+                </>
+              ) : (
+                <>
+                  <Eye className="inline-block w-4 h-4 mr-1" /> {t?.show || "SHOW"}
+                </>
+              )}
+            </button>
+            </div>
           </div>
 
           <div className="relative">
