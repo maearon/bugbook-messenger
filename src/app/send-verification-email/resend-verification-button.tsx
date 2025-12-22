@@ -65,12 +65,14 @@
 "use client";
 
 import { NextPage } from "next";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import javaService from "@/api/services/javaService";
 import flashMessage from "@/components/shared/flashMessages";
 import ShowErrors, { ErrorMessages } from "@/components/shared/errorMessages";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface ResendVerificationButtonProps {
   emailProp: string;
@@ -81,6 +83,20 @@ export function ResendVerificationButton({ emailProp }: ResendVerificationButton
   const [errors, setErrors] = useState<ErrorMessages>({});
   const submitRef = useRef<HTMLButtonElement>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [backText, setBackText] = useState<string>("");
+  const router = useRouter();
+
+  useEffect(() => {
+    const ref = document.referrer;
+
+    if (ref.includes("/signup")) {
+      setBackText("đăng ký");
+    } else if (ref.includes("/profile")) {
+      setBackText("cài đặt");
+    } else {
+      setBackText("");
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,6 +155,16 @@ export function ResendVerificationButton({ emailProp }: ResendVerificationButton
             >
               Email address
             </label>
+            <Link
+              href="/signin"
+              onClick={(e) => {
+                e.preventDefault();
+                router.back();
+              }}
+              className="text-sm text-purple-600 hover:text-purple-700"
+            >
+              ← Quay lại {backText}
+            </Link>
             <input
               className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-xs p-2 focus:ring-black focus:border-border"
               type="email"
