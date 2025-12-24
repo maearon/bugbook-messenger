@@ -72,7 +72,7 @@ import ShowErrors, { ErrorMessages } from "@/components/shared/errorMessages";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface ResendVerificationButtonProps {
   emailProp: string;
@@ -85,18 +85,26 @@ export function ResendVerificationButton({ emailProp }: ResendVerificationButton
   const [submitting, setSubmitting] = useState(false);
   const [backText, setBackText] = useState<string>("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
 
+  // useEffect(() => {
+  //   const ref = document.referrer;
+  //   console.log("referrer:", ref);
+
+  //   if (ref.includes("/signup")) {
+  //     setBackText("đăng ký");
+  //   } else if (ref.includes("/profile")) {
+  //     setBackText("cài đặt");
+  //   } else {
+  //     setBackText("");
+  //   }
+  // }, []);
   useEffect(() => {
-    const ref = document.referrer;
-
-    if (ref.includes("/signup")) {
-      setBackText("đăng ký");
-    } else if (ref.includes("/profile")) {
-      setBackText("cài đặt");
-    } else {
-      setBackText("");
-    }
-  }, []);
+    if (from === "signup") setBackText("đăng ký");
+    else if (from === "profile") setBackText("cài đặt");
+    else setBackText("");
+  }, [from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -177,7 +177,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 
               <div className="text-center text-sm">
                 Chưa xác thực tài khoản?{" "}
-                <Link href="/send-verification-email" className="underline">
+                <Link href="/send-verification-email?from=signup" className="underline">
                   Nhận lại email xác thực
                 </Link>
               </div>

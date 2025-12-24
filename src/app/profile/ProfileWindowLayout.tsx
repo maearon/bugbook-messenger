@@ -114,7 +114,7 @@ function EmailVerificationAlert({ isEmailVerified }: EmailVerificationAlertProps
           </span>
         </div>
         <Button size="sm" asChild>
-          <Link href="/send-verification-email">Verify Email</Link>
+          <Link href="/send-verification-email?from=profile">Verify Email</Link>
         </Button>
       </div>
     </div>
