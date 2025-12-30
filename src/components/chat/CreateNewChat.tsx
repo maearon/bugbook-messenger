@@ -18,7 +18,7 @@ const CreateNewChat = () => {
         onClick={handleGetFriends}
       >
         <Dialog>
-          <DialogTrigger>
+          <DialogTrigger asChild>
             <div className="flex items-center gap-4">
               <div className="size-8 bg-gradient-chat rounded-full flex items-center justify-center group-hover/card:scale-110 transition-bounce">
                 <MessageCircle className="size-4 text-white" />
